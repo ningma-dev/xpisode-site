@@ -16,6 +16,7 @@
 
 | 要先有的 | 现在 |
 | --- | --- |
+| 本仓库 | GitHub `ningma-dev/xpisode-site`（私有） |
 | 本仓库的 `uv.lock` | 有（2026-11-13 在 Mac 上锁的，56 个包，只解析 Linux x86_64） |
 | 站点名、机器名 | `yam_3` / `ubuntu3`（`robots/yam_3/`） |
 | 相机对位置、CAN 对手臂 | 未知，在第 7、8 步确认 |
@@ -72,23 +73,14 @@ ssh -T git@github.com
 
 ## 4. 取本仓库
 
-本仓库还没有 GitHub 远端（建远端要用户同意）。在那之前由 Mac 打成 git bundle 拷过去：
-
-谁：Mac
-
-```bash
-git -C ~/Dev/xirra/xpisode/xpisode-site bundle create /tmp/xpisode-site.bundle main
-scp /tmp/xpisode-site.bundle ubuntu@ubuntu3:
-```
-
 谁：操作员
 
 ```bash
-git clone -b main ~/xpisode-site.bundle ~/xpisode-site
+git clone git@github.com:ningma-dev/xpisode-site.git ~/xpisode-site
 cd ~/xpisode-site && git log --oneline -1
 ```
 
-应该看到：`~/xpisode-site` 里有 `robots/`、`host/`、`scripts/`；`git log` 是 Mac 上最新的提交。有了 GitHub 远端以后改成 `git clone git@github.com:ningma-dev/xpisode-site.git ~/xpisode-site`。
+应该看到：`~/xpisode-site` 里有 `robots/`、`host/`、`scripts/`；`git log` 和 GitHub 上 `main` 的最新提交一样。
 
 ## 5. 机器快照
 
@@ -219,7 +211,7 @@ host/snapshot.sh > robots/yam_3/machine.md
 git add -A robots/yam_3 && git commit -m "yam_3: first setup on ubuntu3"
 ```
 
-`robots/yam_3/LOG.md` 追加一条（第 14 节的格式）。本仓库还没有远端：提交先留在机器上，由 Mac 那边取回（`git bundle create` 反方向拷，或者等有了远端再推，推送要用户同意）。
+`robots/yam_3/LOG.md` 追加一条（第 14 节的格式），和快照一起提交，然后 `git push`。机器上只提交 `robots/yam_3/` 下的东西；手册要改的话也在这次提交里改。
 
 **到这里停。** 打开相机、让手臂动、起站点的都不在本文里。
 

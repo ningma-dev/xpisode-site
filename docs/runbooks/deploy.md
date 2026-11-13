@@ -85,5 +85,5 @@ uv sync --locked && scripts/build_pinned.sh && host/doctor.sh
 
 ## 机器怎么拿到代码（待定）
 
-- 本仓库还没有 GitHub 远端；建之前（要用户同意），由 Mac 那边用 git bundle 拷过去（`add-machine.md` 第 4 步）。
+- 本仓库在 GitHub `ningma-dev/xpisode-site`（私有），机器上 `git clone` 或 `git pull --ff-only`。
 - 三个代码库是私有的，`pyproject.toml` 用 SSH 地址 `git@github.com:ningma-dev/...`。每台机器要一把能读这三个库的 SSH key（`add-machine.md` 第 3 步）。

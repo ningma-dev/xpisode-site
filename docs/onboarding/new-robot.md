@@ -30,7 +30,7 @@ OSS：你的机器领一把**只能上传、下载、列出**的钥匙，放在�
    - 先只做"读"：关节状态、相机。能录下来、能在面板上看了，再做控制。
    - 适配器仓库里放一个协议检查测试（`xpisode_device.check`），写法在同一篇教程的结尾。
 3. **装机**：照 `docs/runbooks/add-machine.md` 走，每一步都有"应该看到"，最后 `host/doctor.sh` 全部通过。
-4. **加机器人目录**：复制 `robots/_template/`（没有就参考 `robots/yam_3/`），改成 `robots/tron2_1/`。
+4. **加机器人目录**：参考 `robots/yam_3/` 的文件，在 `robots/tron2_1/` 里写自己的（`robots/README.md` 说明每个文件是什么）。
    - 目录名就是站点名，全团队唯一；
    - 序列号、数据目录、后台用哪些 CPU 核，写在这个目录里，不写进共用的脚本。
 5. **写本体约定** `profiles/tron2.md`：流名、单位、相机位置名、动作的含义。参考 `profiles/yam-bimanual-3cam.md`。
