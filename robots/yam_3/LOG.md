@@ -17,4 +17,4 @@
 
 ## 2026-11-13 · ningma（现场）+ Claude · 认出每个设备
 - CAN：follower_l 208F3783454650062，follower_r 20833395594E50182，leader_l 20603463584550182，leader_r 20673463584550182
-- 相机：cam_left_wrist 262723071989。cam_head 和 cam_right_wrist 报的是同一个序列号 262723077218，第三台 262723072517 没对上，待现场再确认
+- 相机：cam_head 262723077218，cam_left_wrist 262723071989，cam_right_wrist 262723072517（右腕第二次确认）
