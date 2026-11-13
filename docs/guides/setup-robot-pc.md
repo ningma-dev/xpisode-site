@@ -53,7 +53,11 @@ ssh -T git@github.com
 ```bash
 git clone git@github.com:ningma-dev/xpisode-site.git ~/xpisode-site
 cd ~/xpisode-site
+git config user.name "<站点> robot PC"
+git config user.email "<站点>@xpisode-site.invalid"
 ```
+
+后两行让这台电脑提交日志时署上站点名。
 
 之后的命令都在 `~/xpisode-site` 里运行。
 
