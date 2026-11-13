@@ -69,11 +69,11 @@ command = [
 
 [[devices]]
 name = "cam_left_wrist"
-exclusive = ["realsense:FILL_cam_left_wrist_serial"]
+exclusive = ["realsense:262723071989"]
 command = [
   "../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
   "--factory", "xpisode_realsense:D405", "--config",
-  '{"serial": "FILL_cam_left_wrist_serial", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000}',
+  '{"serial": "262723071989", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000}',
 ]
 
 [[devices]]
