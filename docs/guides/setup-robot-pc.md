@@ -131,7 +131,15 @@ mkdir -p ~/xpisode-data
 
 数据上传到团队共用的 OSS。所有机器人电脑共用一把上传钥匙，它只能上传和下载，不能删除。
 
-1. 下载阿里云的 ossutil 2.x，把可执行文件放到 `~/.local/bin/ossutil`。
+1. 装 ossutil：
+
+   ```bash
+   curl -fLo /tmp/ossutil.zip https://gosspublic.alicdn.com/ossutil/v2/2.1.2/ossutil-2.1.2-linux-amd64.zip
+   python3 -m zipfile -e /tmp/ossutil.zip /tmp/ossutil
+   install -D -m 755 /tmp/ossutil/*/ossutil ~/.local/bin/ossutil
+   ~/.local/bin/ossutil version
+   ```
+
 2. 运行 `~/.local/bin/ossutil config`，填入负责人给的钥匙，地域填 `cn-shanghai`。然后运行 `chmod 600 ~/.ossutilconfig`。钥匙只放在这个文件里。
 3. 检查：
 
