@@ -1,0 +1,13 @@
+# xpisode: usbfs buffer memory for several RealSense cameras on one machine. The default 16 MB is
+# too little for three D405 streams; librealsense's guidance for multi-camera setups is 1000 MB.
+[Unit]
+Description=xpisode: raise usbcore usbfs_memory_mb
+After=systemd-modules-load.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo 1000 > /sys/module/usbcore/parameters/usbfs_memory_mb'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

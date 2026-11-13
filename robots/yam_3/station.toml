@@ -1,0 +1,193 @@
+# Station yam_3 on machine ubuntu3: two YAM pairs, three D405s. Everything specific to this robot
+# is in robots/yam_3/: this file, machine.env (host facts), can.toml (CAN adapter serials),
+# tuned/ (per-arm tuning), machine.md (snapshot), LOG.md (what was done to it).
+# Profile (本体约定): yam-bimanual-3cam (draft, profiles/yam-bimanual-3cam.md). The station file
+# has no key for it yet (design.md 8.4), so it is declared here as a comment.
+#
+# Provenance: copied from yam_abc.toml (the old station, 2026-11-13). Rates, resolution,
+# exposure, frame fields, groups, buttons, clients and transforms are kept as on yam_abc.
+# Per-machine facts are marked FILL. A FILL serial names no camera, so that device cannot open
+# and the station cannot record (blocking: device) until it is filled in.
+#
+#     scripts/run.sh --who NAME        (or: .venv/bin/xpisode run robots/yam_3/station.toml --who NAME)
+#
+# Commands run beside this file (robots/yam_3/); every device and client uses the repo's .venv.
+#
+# Cameras: surveyed on ubuntu3 2026-11-13, roles NOT known yet. The operator assigns each serial
+# to cam_head / cam_left_wrist / cam_right_wrist (docs/runbooks/add-machine.md) and replaces the
+# FILL values:
+#   262723072517  USB 2-4   xHCI 0000:0d:00.0 (IRQ 45 -> CPU4)
+#   262723077218  USB 2-5   xHCI 0000:0d:00.0 (IRQ 45 -> CPU4)
+#   262723071989  USB 10-2  xHCI 0000:79:00.4 (IRQ 79 -> CPU8)
+#
+# CAN: the channel names are the arm roles, the same on every YAM machine (can_follower_l, ...);
+# udev gives them from can.toml (host/can_rules.py, docs/runbooks/map-can.md).
+#
+# Tuning: tuned/ here must be measured on these arms (robots/README.md). Until then the followers
+# cannot open. yam_abc's files (robots/_archive/yam_abc/tuned/) do not describe these arms.
+
+station = "yam_3"
+control_hz = 100
+drain_ms = 1000
+required_streams = [
+  "/follower_l/state", "/follower_r/state", "/leader_l/input", "/leader_r/input",
+  "/cam_head/frame", "/cam_left_wrist/frame", "/cam_right_wrist/frame",
+]
+
+[[devices]]
+name = "follower_l"
+exclusive = ["can:can_follower_l"]
+command = ["../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
+           "--factory", "xpisode_i2rt.xpisode:YamFollower", "--config", '{"channel": "can_follower_l", "tuned": "tuned/can_follower_l.json"}']
+
+[[devices]]
+name = "follower_r"
+exclusive = ["can:can_follower_r"]
+command = ["../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
+           "--factory", "xpisode_i2rt.xpisode:YamFollower", "--config", '{"channel": "can_follower_r", "tuned": "tuned/can_follower_r.json"}']
+
+[[devices]]
+name = "leader_l"
+exclusive = ["can:can_leader_l"]
+command = ["../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
+           "--factory", "xpisode_i2rt.xpisode:YamLeader", "--config", '{"channel": "can_leader_l", "rate_hz": 200, "encoder_every": 2}']
+
+[[devices]]
+name = "leader_r"
+exclusive = ["can:can_leader_r"]
+command = ["../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
+           "--factory", "xpisode_i2rt.xpisode:YamLeader", "--config", '{"channel": "can_leader_r", "rate_hz": 200, "encoder_every": 2}']
+
+[[devices]]
+name = "cam_head"
+exclusive = ["realsense:FILL_cam_head_serial"]
+command = [
+  "../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
+  "--factory", "xpisode_realsense:D405", "--config",
+  '{"serial": "FILL_cam_head_serial", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000}',
+]
+
+[[devices]]
+name = "cam_left_wrist"
+exclusive = ["realsense:FILL_cam_left_wrist_serial"]
+command = [
+  "../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
+  "--factory", "xpisode_realsense:D405", "--config",
+  '{"serial": "FILL_cam_left_wrist_serial", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000}',
+]
+
+[[devices]]
+name = "cam_right_wrist"
+exclusive = ["realsense:FILL_cam_right_wrist_serial"]
+command = [
+  "../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
+  "--factory", "xpisode_realsense:D405", "--config",
+  '{"serial": "FILL_cam_right_wrist_serial", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000}',
+]
+
+[groups.left]
+endpoints = ["follower_l/joint_position"]
+holder = "teleop_left"
+
+[groups.right]
+endpoints = ["follower_r/joint_position"]
+holder = "teleop_right"
+
+# Each teleop client makes its leader follow the follower during policy control.
+[groups.leader_left]
+endpoints = ["leader_l/joint_position"]
+holder = "teleop_left"
+
+[groups.leader_right]
+endpoints = ["leader_r/joint_position"]
+holder = "teleop_right"
+
+# The leaders' buttons: button 0 on either switches both arms between the
+# teleop clients and whoever had them before (a policy); the left button 1 starts and ends a
+# recording, which gives the arms back to the teleop clients.
+[[inputs]]
+stream = "leader_l/input"
+field = "buttons"
+index = 0
+operation = "switch"
+groups = ["left", "right"]
+
+[[inputs]]
+stream = "leader_r/input"
+field = "buttons"
+index = 0
+operation = "switch"
+groups = ["left", "right"]
+
+[[inputs]]
+stream = "leader_l/input"
+field = "buttons"
+index = 1
+operation = "record"
+
+# The right button 1 takes both arms to the ready pose.
+[[inputs]]
+stream = "leader_r/input"
+field = "buttons"
+index = 1
+operation = "grant"
+groups = ["left", "right"]
+client = "move"
+prompts = { target = "ready" }
+
+[[clients]]
+name = "teleop_left"
+command = ["../../.venv/bin/python", "-m", "xpisode_env.teleop", "--station", "{station}", "--name", "{name}", "--config", "../_shared/teleop_left.toml"]
+
+[[clients]]
+name = "teleop_right"
+command = ["../../.venv/bin/python", "-m", "xpisode_env.teleop", "--station", "{station}", "--name", "{name}", "--config", "../_shared/teleop_right.toml"]
+
+# Open-loop control: to a pose saved in poses.toml, or along a clip of an
+# Episode, as its `target` prompt says; then it holds the arms there until button 0 switches
+# them. Save a pose
+# (or edit poses.toml) with
+#   .venv/bin/python -m xpisode_env.move --station yam_3 --name save --group left --group right --save ready
+[[clients]]
+name = "move"
+command = ["../../.venv/bin/python", "-m", "xpisode_env.move", "--station", "{station}", "--name", "{name}", "--group", "left", "--group", "right"]
+
+# Says out loud what blocks recording, a recording cut short, and quickcheck's alerts. It joins
+# with no control groups, so a running one is adopted, never started twice.
+[[clients]]
+name = "announcer"
+command = ["../../.venv/bin/python", "../../scripts/announcer.py", "--station", "{station}", "--name", "{name}"]
+
+# Where the cameras and the right arm are (as on yam_abc; assumes yam_3 is built to the same
+# i2rt station CAD -- confirm before relying on them): the station's CAD, as i2rt ships it
+# in i2rt/robot_models/station/yam_station_linear_4310_d405 (v1.3.6), read off its URDF at full
+# precision. Its left_base and {side}_gripper (the flange) are the declared models' base and
+# gripper (checked: 1 um, 0.0004 deg apart at zero); its cameras are optical frames (+z forward).
+
+[[transforms]]
+parent = "follower_l/base"
+child = "follower_r/base"
+translation = [0, -0.61, 0]  # metres: x, y, z of the child in the parent
+rotation = [0, 0, 0, 1]  # unit quaternion: x, y, z, w
+source = "CAD: i2rt v1.3.6 yam_station_linear_4310_d405, left_base -> right_base"
+
+[[transforms]]
+parent = "follower_l/base"
+child = "cam_head/color"
+translation = [-0.16649488, -0.305, 0.95432053]  # metres: x, y, z of the child in the parent
+rotation = [-0.68301167, 0.683014179, -0.183012208, 0.183011536]  # unit quaternion: x, y, z, w
+source = "CAD: i2rt v1.3.6 yam_station_linear_4310_d405, left_base -> top_camera"
+
+[[transforms]]
+parent = "follower_l/gripper"
+child = "cam_left_wrist/color"
+translation = [-7.65679795e-08, -0.0704349787, 0.077005929]  # metres: x, y, z of the child in the parent
+rotation = [-0.216444662, -1.79306714e-06, -3.97516236e-07, 0.976294888]  # unit quaternion: x, y, z, w
+source = "CAD: i2rt v1.3.6 yam_station_linear_4310_d405, left_gripper -> left_camera"
+
+[[transforms]]
+parent = "follower_r/gripper"
+child = "cam_right_wrist/color"
+translation = [-7.65679795e-08, -0.0704349787, 0.077005929]  # metres: x, y, z of the child in the parent
+rotation = [-0.216444662, -1.79306714e-06, -3.97516236e-07, 0.976294888]  # unit quaternion: x, y, z, w
+source = "CAD: i2rt v1.3.6 yam_station_linear_4310_d405, right_gripper -> right_camera"

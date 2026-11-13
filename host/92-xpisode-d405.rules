@@ -1,0 +1,4 @@
+# xpisode: let the station user open the D405s through libusb (pyrealsense2 from PyPI uses the
+# libusb backend; without this only root can). The D405 line of librealsense's own
+# config/99-realsense-libusb.rules, which covers every RealSense model.
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="0b5b", MODE:="0666", GROUP:="plugdev"

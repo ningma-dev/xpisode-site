@@ -1,0 +1,26 @@
+{
+  "by": "ningma",
+  "name": "insert_smt act vs pi05 1111",
+  "task": "insert_smt_reels",
+  "station": "yam_abc",
+  "notes": "盲评：复位照参考图，开始，结束或接管，判断。",
+  "repeats": 5,
+  "block": 3,
+  "seed": 20261112,
+  "time_limit_s": 90,
+  "judge": "ningma",
+  "candidates": {
+    "a": {
+      "client": "act",
+      "command": "cd /home/ubuntu/xpisode-lanes/tonight/act && exec .venv/bin/python xpisode_policy.py --root /home/ubuntu/xpisode/data --checkpoint run:ACT_TRAIN_RUN/train/best.pt --station yam_abc"
+    },
+    "b": {
+      "client": "rlinf_pi05",
+      "command": "cd /home/ubuntu/xpisode-lanes/tonight/RLinf && exec .venv/bin/python xpisode_policy.py --root /home/ubuntu/xpisode/data --checkpoint PI05_CHECKPOINT --steps 10 --execute 30 --station yam_abc"
+    }
+  },
+  "layouts": {
+    "l1": {"at": "episode:LAYOUT_EPISODE_1#ns=1000000000,1000000000", "note": "布局 1"},
+    "l2": {"at": "episode:LAYOUT_EPISODE_2#ns=1000000000,1000000000", "note": "布局 2"}
+  }
+}

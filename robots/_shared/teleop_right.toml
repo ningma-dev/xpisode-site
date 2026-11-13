@@ -1,0 +1,24 @@
+# The xpisode reference teleop client for the right pair, mapping the teaching handle to the
+# follower as minimum_gello does: joints one to one, gripper opening = 1 - trigger. While it
+# has the right arm, the follower follows the leader; while it does not (a policy drives, or
+# nobody does), the leader follows the follower. Getting the arm, it first
+# brings the leader to the follower at align_speed, the follower holding still.
+group = "right"
+leader_group = "leader_right"
+align_speed = 0.5
+
+[[follow]]
+target = "follower_r/joint_position/joint_pos"
+source = "leader_r/input/joint_pos"
+state = "follower_r/state/joint_pos"
+
+[[follow]]
+target = "follower_r/joint_position/gripper_pos"
+source = "leader_r/input/trigger"
+state = "follower_r/state/gripper_pos"
+scale = -1.0
+offset = 1.0
+
+[[mirror]]
+target = "leader_r/joint_position/joint_pos"
+source = "follower_r/state/joint_pos"

@@ -1,0 +1,13 @@
+# The environment and everything built for it (scripts/build_pinned.sh builds under local/).
+.venv/
+local/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Data never lives here; ~/xpisode-data is the data root. Guard against a stray one.
+data/
+
+# Development on the Mac (scripts/dev_link.sh changes only .venv; nothing else to ignore).
+*.local.toml
+.DS_Store

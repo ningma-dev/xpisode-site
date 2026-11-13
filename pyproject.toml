@@ -1,0 +1,50 @@
+# xpisode-site: the team's deployment project. Every robot machine installs exactly the
+# versions pinned here (`uv sync --locked`); nobody develops on a robot machine.
+# Bump a pin: change the rev below, `uv lock`, commit both files (docs/runbooks/deploy.md).
+
+[project]
+name = "xpisode-site"
+version = "0"
+requires-python = ">=3.12"
+dependencies = [
+  "xpisode",
+  "xpisode-realsense",
+  "xpisode-i2rt",
+  # Every package that [tool.uv.sources] places is listed here too: uv applies a project's
+  # sources to its own dependencies only.
+  "xpisode-format",
+  "xpisode-device",
+  "xpisode-env",
+]
+
+[tool.uv]
+package = false
+# Robot machines only. The Mac does not sync this project (pyrealsense2 has no macOS wheels);
+# it develops with scripts/dev_link.sh.
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
+# The pinned framework packages take precedence over the sources the adapters declare.
+# Keep the iox/rerun extras a complete station needs.
+override-dependencies = [
+  "xpisode-device[iox]>=0.1.0,<0.2",
+  "xpisode-format[rerun]>=0.1.0,<0.2",
+]
+
+[tool.xpisode]
+# The data root is outside this repository on every machine: ~/xpisode-data is a directory or
+# a symlink to the machine's big disk (docs/runbooks/add-machine.md). It is never inside the repo.
+data = "~/xpisode-data"
+# No default_station: each machine runs its own robots/<station>/station.toml, chosen by
+# scripts/station_env.sh from machine.env (XPISODE_HOST); see robots/README.md.
+
+# Pinned exact commits. Change them only together with uv.lock.
+[tool.uv.sources]
+xpisode = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "01d6d596408702c1feea81860ca3432d3263adc2" }
+xpisode-format = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "01d6d596408702c1feea81860ca3432d3263adc2", subdirectory = "packages/xpisode-format" }
+xpisode-device = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "01d6d596408702c1feea81860ca3432d3263adc2", subdirectory = "packages/xpisode-device" }
+xpisode-env = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "01d6d596408702c1feea81860ca3432d3263adc2", subdirectory = "packages/xpisode-env" }
+xpisode-realsense = { git = "ssh://git@github.com/ningma-dev/xpisode-realsense.git", rev = "223c00d192fe4bc668abe096be6d292023a145c0" }
+xpisode-i2rt = { git = "ssh://git@github.com/ningma-dev/xpisode-i2rt.git", rev = "c458074178b99bb0dac2cdbb18d1f2926338c28c" }
+
+[dependency-groups]
+# The adapters' tests can run in this environment too.
+dev = ["hypothesis>=6.100", "pytest>=8.3"]

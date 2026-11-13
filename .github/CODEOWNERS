@@ -1,0 +1,25 @@
+# Who reviews what. Placeholders until the team's GitHub handles are settled.
+
+# Shared by every robot: versions, scripts, host setup, profiles, docs, agent rules.
+/pyproject.toml           @ningma-dev
+/uv.lock                  @ningma-dev
+/.python-version          @ningma-dev
+/scripts/                 @ningma-dev
+/host/                    @ningma-dev
+/tools/                   @ningma-dev
+/profiles/                @ningma-dev
+/docs/                    @ningma-dev
+/CLAUDE.md                @ningma-dev
+/README.md                @ningma-dev
+/.github/                 @ningma-dev
+/robots/README.md         @ningma-dev
+/robots/_shared/          @ningma-dev
+/robots/_archive/         @ningma-dev
+
+# The YAM robots: station file, host facts, CAN map, tuning, snapshot, log.
+/robots/yam_*/            @ningma-dev
+/profiles/yam-*.md        @ningma-dev
+
+# Tron2: its owner (a colleague) fills in the handle.
+# /robots/tron2_*/        @<colleague-handle-TBD>
+# /profiles/tron2*.md     @<colleague-handle-TBD>
