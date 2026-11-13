@@ -94,10 +94,12 @@ count=0
 while read -r dev; do
   [[ -n "$dev" ]] || continue
   count=$((count + 1))
-  [[ "$(cat "$dev/power/control" 2>/dev/null)" == on ]] || asleep+=("$(basename "$dev")")
+  # Either never-suspend setting is enough: control "on", or a negative delay.
+  delay="$(cat "$dev/power/autosuspend_delay_ms" 2>/dev/null || echo 0)"
+  [[ "$(cat "$dev/power/control" 2>/dev/null)" == on || "$delay" == -* ]] || asleep+=("$(basename "$dev")")
 done < <(usb_devices 8086 0b5b; usb_devices 1d50 606f)
 if [[ $count -eq 0 ]]; then todo autosuspend "no D405 or CAN adapter plugged in"
-elif [[ ${#asleep[@]} -eq 0 ]]; then pass autosuspend "power/control = on for $count devices"
+elif [[ ${#asleep[@]} -eq 0 ]]; then pass autosuspend "never suspended: $count devices"
 else fail autosuspend "autosuspend on: ${asleep[*]} (replug or reboot after host/setup.sh)"; fi
 
 # data root: outside the repo, writable, not on NTFS

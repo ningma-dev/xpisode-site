@@ -1,0 +1,12 @@
+# CAN adapter serial of each arm role on yam_1: the only source of the udev rule
+# (host/can_rules.py). The channel names are the role names, can_<role>, the same on every YAM
+# machine; only the serials differ. can_rules.py refuses while one is FILL or two are the same.
+# A serial names the adapter, not the arm: label each adapter and its cable with the arm name and
+# keep them together. Map them with docs/guides/identify-devices.md (unplug one at a time), never from
+# port order.
+# Plugged in at the survey (2026-11-13): none.
+
+follower_l = "FILL"
+follower_r = "FILL"
+leader_l = "FILL"
+leader_r = "FILL"
