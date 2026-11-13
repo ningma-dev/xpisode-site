@@ -6,7 +6,7 @@
 #     host/doctor.sh [STATION]          exit status: the number of FAIL lines
 #
 # Items: tools, rtprio, memlock, groups, udev-rules, can-rule, can-links, usbfs, autosuspend,
-# data-root, background-cpus, irq-layout, venv, rtcore, panel, station-file, tuned.
+# data-root, background-cpus, irq-layout, venv, rtcore, panel, station-file, cameras, tuned.
 # TODO is a step not done yet that depends on a fact still marked FILL (CAN map, camera roles,
 # tuning); FAIL is something that should already be right.
 set -uo pipefail
@@ -151,6 +151,16 @@ name="$(python3 -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "r
 if [[ "$name" != "$XPISODE_STATION" ]]; then fail station-file "station = \"$name\", directory robots/$XPISODE_STATION"
 elif grep -q 'FILL_' "$dir/station.toml"; then todo station-file "camera serials still FILL (camera roles)"
 else pass station-file "robots/$XPISODE_STATION/station.toml"; fi
+# every camera the station file names is plugged in, under the serial librealsense reports
+wanted="$(grep -o '"serial": "[^"]*"' "$dir/station.toml" | cut -d'"' -f4 | grep -v '^FILL' | sort -u)"
+if [[ -z "$wanted" ]]; then todo cameras "no camera serials in the station file yet"
+elif [[ ! -x "$site/.venv/bin/python" ]]; then todo cameras "after uv sync --locked"
+else
+  found="$("$site/.venv/bin/python" "$host/camera_serials.py" --serials 2>/dev/null | sort -u)"
+  missing="$(comm -23 <(echo "$wanted") <(echo "$found") | tr '\n' ' ')"
+  if [[ -z "$missing" ]]; then pass cameras "all $(echo "$wanted" | wc -l | tr -d ' ') found"
+  else fail cameras "not found: ${missing}(serials must come from host/camera_serials.py)"; fi
+fi
 untuned=()
 for side in l r; do [[ -f "$dir/tuned/can_follower_$side.json" ]] || untuned+=("follower_$side"); done
 if [[ ${#untuned[@]} -eq 0 ]]; then pass tuned "both followers"; else todo tuned "not measured: ${untuned[*]} (robots/README.md, operator window)"; fi

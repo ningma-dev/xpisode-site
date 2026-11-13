@@ -37,7 +37,7 @@ robots/<站点>/
 | --- | --- | --- |
 | `host/setup.sh` | 系统设置 | 会，要 sudo |
 | `host/can_rules.py` | 生成 CAN 命名规则 | 加 `--check` 只预览；不加要 sudo |
-| `host/doctor.sh`、`host/snapshot.sh`、`host/can_list.sh`、`host/xhci_list.sh` | 体检、快照、列出设备 | 不会，也不打开设备 |
+| `host/doctor.sh`、`host/snapshot.sh`、`host/can_list.sh`、`host/xhci_list.sh`、`host/camera_serials.py` | 体检、快照、列出设备 | 不会，也不让相机开始拍摄 |
 | `scripts/run.sh` | 启动站点 | 手臂会动，要有人在场 |
 | `scripts/serve.sh`、`scripts/upload.sh` | 网页面板、自动上传 | 不会 |
 

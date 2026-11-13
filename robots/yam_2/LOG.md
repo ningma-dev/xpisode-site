@@ -18,3 +18,7 @@
 ## 2026-11-13 · ningma（现场）+ Claude · 认出每个设备
 - CAN：follower_l 206B3393594E50182，follower_r 20973485584550182，leader_l 20743395594E50182，leader_r 20843399594E50182
 - 相机：cam_head 255323071678，cam_left_wrist 262723072302，cam_right_wrist 260323074516
+
+## 2026-11-13 · Claude · 修正相机序列号
+- 站点启动时三台相机都报 `No device connected`：站点文件里填的是 USB 序列号，librealsense 要的是相机自己的序列号（标签上那个）
+- 用 host/camera_serials.py 读出对应关系，改了 station.toml；体检加了 `cameras` 一项，以后这种错会直接查出来

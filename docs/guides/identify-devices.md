@@ -4,7 +4,7 @@
 
 **什么时候做：** 第一次装机；换了适配器、线或相机之后。
 
-**要求：** 人在电脑旁边，只拔插 USB 线。手臂不会动，相机也不会被打开。
+**要求：** 人在电脑旁边，只拔插 USB 线；xpisode 已经装好（[准备一台机器人电脑](setup-robot-pc.md)第 6 步）。手臂不会动，相机不会开始拍摄。
 
 命令都在 `~/xpisode-site` 里运行。下面以 YAM 为例，手臂和相机的名字见 `profiles/yam-bimanual-3cam.md`。
 
@@ -38,13 +38,15 @@ sudo host/can_rules.py
 
 ## 2. 相机对位置
 
+相机有两个序列号，站点文件要用的是贴在相机标签上的那个，只有下面这个命令能看到。`lsusb` 和 `host/xhci_list.sh` 显示的是另一个，填进去相机会打不开。
+
 每台相机做一遍：
 
 1. 拔下这台相机的 USB；
-2. 运行 `host/xhci_list.sh`，少了的那个序列号就是它；
+2. 运行 `.venv/bin/python host/camera_serials.py`，少了的那个就是它，记下第一列；
 3. 插回去。
 
-在 `robots/<站点>/station.toml` 里，把 `FILL_cam_head_serial` 这类占位换成对应的序列号。每台相机在文件里出现两次，两处都要换。
+在 `robots/<站点>/station.toml` 里，把 `FILL_cam_head_serial` 这类占位换成第一列的序列号。每台相机在文件里出现两次，两处都要换。
 
 ## 3. 记下 USB 控制器
 
@@ -64,7 +66,7 @@ XPISODE_DEVICE_XHCI=(
 host/doctor.sh
 ```
 
-**成功的样子：** `can-rule`、`can-links`、`irq-layout`、`station-file` 都是 PASS。
+**成功的样子：** `can-rule`、`can-links`、`irq-layout`、`station-file`、`cameras` 都是 PASS。
 
 如果 `can-links` 是 FAIL，把那个适配器拔下再插上，或者重启电脑。
 

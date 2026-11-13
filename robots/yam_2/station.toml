@@ -60,29 +60,29 @@ command = ["../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--stati
 
 [[devices]]
 name = "cam_head"
-exclusive = ["realsense:255323071678"]
+exclusive = ["realsense:260522271527"]
 command = [
   "../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
   "--factory", "xpisode_realsense:D405", "--config",
-  '{"serial": "255323071678", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000}',
+  '{"serial": "260522271527", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000}',
 ]
 
 [[devices]]
 name = "cam_left_wrist"
-exclusive = ["realsense:262723072302"]
+exclusive = ["realsense:262622273187"]
 command = [
   "../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
   "--factory", "xpisode_realsense:D405", "--config",
-  '{"serial": "262723072302", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000}',
+  '{"serial": "262622273187", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000}',
 ]
 
 [[devices]]
 name = "cam_right_wrist"
-exclusive = ["realsense:260323074516"]
+exclusive = ["realsense:260322276348"]
 command = [
   "../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
   "--factory", "xpisode_realsense:D405", "--config",
-  '{"serial": "260323074516", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000}',
+  '{"serial": "260322276348", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000}',
 ]
 
 [groups.left]

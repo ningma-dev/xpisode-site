@@ -81,7 +81,7 @@ cp -r robots/_template/yam robots/<站点>
 - `robots/<站点>/station.toml` 里的 `station = "FILL"` 改成站点名；
 - `robots/<站点>/machine.env` 里的 `XPISODE_HOST=FILL` 改成平时 ssh 连这台电脑用的名字。
 
-设备序列号先留着 `FILL`，第 6 步再填。
+设备序列号先留着 `FILL`，第 7 步再填。
 
 ## 5. 系统设置
 
@@ -100,13 +100,7 @@ host/doctor.sh
 
 **成功的样子：** `rtprio`、`memlock`、`groups`、`udev-rules`、`usbfs`、`autosuspend` 都是 PASS。其他项这时是 FAIL 或 TODO，属于正常，后面的步骤会逐项解决。
 
-## 6. 认出每个设备
-
-照[认出每个设备](identify-devices.md)做，需要人在电脑旁边拔插 USB 线。
-
-**成功的样子：** `host/doctor.sh` 里 `can-rule`、`can-links`、`irq-layout`、`station-file` 都是 PASS。
-
-## 7. 装 xpisode
+## 6. 装 xpisode
 
 ```bash
 uv sync --locked
@@ -116,6 +110,12 @@ scripts/build_pinned.sh
 装的是本仓库写定的版本，每台电脑都一样。第一次要下载和编译，二三十分钟。中途出现 `npm warn allow-scripts` 可以不管。
 
 **成功的样子：** 没有 `error`；`host/doctor.sh` 里 `venv`、`rtcore`、`panel` 都是 PASS。
+
+## 7. 认出每个设备
+
+照[认出每个设备](identify-devices.md)做，需要人在电脑旁边拔插 USB 线。
+
+**成功的样子：** `host/doctor.sh` 里 `can-rule`、`can-links`、`irq-layout`、`station-file`、`cameras` 都是 PASS。
 
 ## 8. 准备数据目录
 
@@ -178,7 +178,7 @@ git push
 
 - **重装前**：运行 `.venv/bin/python scripts/oss.py status`，确认"没上传的"是 0。本机没推送的提交先推送。
 - **第 4 步**：只写 `.station`。
-- **第 6 步**：设备和线都没动过的话，只运行 `host/can_list.sh` 和 `host/xhci_list.sh`，核对和 `robots/<站点>/` 里记的一致。
+- **第 7 步**：设备和线都没动过的话，只运行 `host/doctor.sh`，确认 `can-links`、`cameras` 是 PASS。
 - **第 11 步**：先运行 `git diff robots/<站点>/machine.md`，看硬件有没有变化。
 
 ## 哪一步不对
