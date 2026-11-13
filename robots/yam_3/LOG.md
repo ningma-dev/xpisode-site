@@ -18,3 +18,9 @@
 ## 2026-11-13 · ningma（现场）+ Claude · 认出每个设备
 - CAN：follower_l 208F3783454650062，follower_r 20833395594E50182，leader_l 20603463584550182，leader_r 20673463584550182
 - 相机：cam_head 262723077218，cam_left_wrist 262723071989，cam_right_wrist 262723072517（右腕第二次确认）
+
+## 2026-11-13 · ningma + Claude · 准备一台机器人电脑第 5–11 步、给手臂调参
+- 版本：本仓库 d8d2547
+- 调参：两条跟随臂都调了（20:50），调完后误差 7–11 mm（按速度分档，见 tuned/）
+- 结果：体检 0 FAIL；machine.md 换成了 host/snapshot.sh 的输出
+- 和文档不一样的地方：无
