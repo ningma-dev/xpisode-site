@@ -22,7 +22,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ```
 
-关掉终端再打开一个，然后检查：
+关掉终端再打开一个（经 ssh 操作的话，重新登录一次），然后检查：
 
 ```bash
 git --version && uv --version && cargo --version
@@ -76,8 +76,7 @@ ls robots/<站点>/
   ```
 
   1. `robots/<站点>/station.toml` 里的 `station = "..."` 改成 `<站点>`；
-  2. `robots/<站点>/machine.env` 里的 `XPISODE_HOST=` 改成这台电脑的名字（运行 `hostname -s` 可以看到），只是做个记录；
-  3. `robots/<站点>/LOG.md` 清空，只留标题。
+  2. `robots/<站点>/LOG.md` 清空，只留标题。
 
   相机和 CAN 的序列号先不管，第 6 步再填。
 
@@ -102,7 +101,7 @@ sudo reboot
 host/doctor.sh
 ```
 
-**成功的样子：** `rtprio`、`groups`、`usbfs`、`autosuspend` 这几项显示 PASS。其余项后面的步骤会让它们通过。
+**成功的样子：** `rtprio`、`memlock`、`groups`、`udev-rules`、`usbfs`、`autosuspend`、`irq-layout` 显示 PASS。其余项后面的步骤会让它们通过。
 
 ## 6. 认出每个设备
 
@@ -117,7 +116,9 @@ uv sync --locked
 scripts/build_pinned.sh
 ```
 
-第一次要编译，十几分钟。装的版本是本仓库写定的版本，每台机器都一样。
+装的版本是本仓库写定的版本，每台机器都一样。第一次要下载和编译，二三十分钟，主要看网速。要先做完第 1 步（会用到 Rust）。这一步不需要 sudo，也不碰硬件，可以和第 5、6 步错开做。
+
+过程中出现 `npm warn allow-scripts … esbuild` 不用管。
 
 **成功的样子：** 没有 `error`；`host/doctor.sh` 里 `venv`、`rtcore`、`panel` 显示 PASS。
 
@@ -144,7 +145,7 @@ df -hT ~/xpisode-data
    .venv/bin/python scripts/oss.py status
    ```
 
-**成功的样子：** 显示 OSS 上已有多少条录制、本机还有多少没上传。
+**成功的样子：** 显示 OSS 上已有多少条录制、本机还有多少没上传。`host/doctor.sh` 的 `tools` 一项要到这一步之后才会通过。
 
 ## 10. 体检
 

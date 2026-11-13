@@ -21,6 +21,7 @@ for pair in "$@"; do
   fi
   [[ ${#irqs[@]} -gt 0 ]] || irqs=("$(cat "$dev/irq")")
   for irq in "${irqs[@]}"; do
+    [[ -d "/proc/irq/$irq" ]] || continue  # allocated but never requested: serves nothing
     if echo "$cpu" >"/proc/irq/$irq/smp_affinity_list" 2>/dev/null; then
       echo "$pci irq $irq -> cpu $(cat "/proc/irq/$irq/effective_affinity_list" 2>/dev/null || echo "$cpu")"
     else

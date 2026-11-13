@@ -28,6 +28,9 @@ irqs_of() {  # irqs_of PCI: "irq:cpus" for each of its interrupts, effective aff
   fi
   [[ ${#irqs[@]} -gt 0 ]] || irqs=("$(cat "$dev/irq" 2>/dev/null || echo "?")")
   for irq in "${irqs[@]}"; do
+    # A controller allocates several vectors but requests only some; unrequested ones have no
+    # /proc/irq entry and serve nothing.
+    [[ "$irq" == "?" || -d "/proc/irq/$irq" ]] || continue
     out+=("$irq:$(cat "/proc/irq/$irq/effective_affinity_list" 2>/dev/null || echo "?")")
   done
   echo "${out[*]}"

@@ -4,7 +4,7 @@
     sudo host/can_rules.py [STATION]          write it if it changed, reload and trigger udev
     host/can_rules.py [STATION] --check       print what would change; write nothing
 
-STATION is robots/<STATION>/ (default: the one whose machine.env has this machine's hostname).
+STATION is robots/<STATION>/ (default: the name in the repo's .station file).
 Its can.toml (``<role> = "<serial>"``) is the only source: the adapter with that serial is named
 ``can_<role>`` (the same names on every YAM machine) and brought up at 1 Mbit/s, and
 ModemManager leaves it alone. It refuses while a serial is FILL (or empty) or two roles share one.
