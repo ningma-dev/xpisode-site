@@ -8,3 +8,9 @@
 - 重新插线后四个 CAN 适配器：20843399594E50182（1-4，0d:00.0）、20973485584550182（3-4.1，0f:00.0）、206B3393594E50182（3-4.2，0f:00.0）、20743395594E50182（9-2，79:00.4，CPU8）。对哪条臂未定。
 - 同一型号主板，相机插的口和 ubuntu3 不同，中断落的核也不同：每台都要量。
 - 没有改动这台机器。
+
+## 2026-11-13 · ningma + Claude · 准备一台机器人电脑，第 1–5、7、8 步
+- 第 1 步的 apt、第 5 步的 sudo host/setup.sh 和重启：ningma；其余步骤由 Claude 经 ssh 完成
+- 版本：xpisode-site a9b6bed；xpisode 01d6d59，xpisode-realsense 223c00d，xpisode-i2rt c458074
+- 结果：体检 2 FAIL：tools（还没装 ossutil，第 9 步）、autosuspend（相机仍是 auto，已改规则，待重跑 setup.sh 后验证）；其余 PASS 或 TODO
+- 和文档不一样的地方：中断列表误报、第 7 步耗时和顺序、ssh 下找不到 uv，都已经在文档和脚本里改了
