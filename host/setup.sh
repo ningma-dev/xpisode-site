@@ -48,11 +48,8 @@ XPISODE_STATION="$station"
 # shellcheck source=../scripts/station_env.sh
 source "$site/scripts/station_env.sh"
 if [[ -z "$XPISODE_STATION" ]]; then
-  echo "no robots/*/machine.env has XPISODE_HOST=$(hostname -s); give the station name" >&2
+  echo "no station: write its name into .station (echo <station> > .station), or give it: sudo $0 <station>" >&2
   exit 2
-fi
-if [[ "$XPISODE_HOST" != "$(hostname -s)" ]]; then
-  echo "warning: robots/$XPISODE_STATION/machine.env is for $XPISODE_HOST, this is $(hostname -s)" >&2
 fi
 echo "station $XPISODE_STATION, user $user"
 

@@ -58,11 +58,14 @@ cd ~/xpisode-site
 
 **之后所有命令都在 `~/xpisode-site` 里运行。**
 
-## 4. 确认这台机器人的目录
+## 4. 告诉这台电脑它是哪个站点
 
 ```bash
+echo <站点> > .station
 ls robots/<站点>/
 ```
+
+`.station` 只存在这台电脑上，不提交。之后的脚本都靠它知道自己是哪个站点。
 
 - **重装的机器：** 目录已经有了，继续下一步。
 - **新机器人：** 复制一台同种机器人的目录，然后改三处：
@@ -73,7 +76,7 @@ ls robots/<站点>/
   ```
 
   1. `robots/<站点>/station.toml` 里的 `station = "..."` 改成 `<站点>`；
-  2. `robots/<站点>/machine.env` 里的 `XPISODE_HOST=` 改成这台电脑的名字（运行 `hostname -s` 可以看到）；
+  2. `robots/<站点>/machine.env` 里的 `XPISODE_HOST=` 改成这台电脑的名字（运行 `hostname -s` 可以看到），只是做个记录；
   3. `robots/<站点>/LOG.md` 清空，只留标题。
 
   相机和 CAN 的序列号先不管，第 6 步再填。

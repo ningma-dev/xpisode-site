@@ -6,7 +6,7 @@ set -euo pipefail
 here="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$here/scripts/station_env.sh"
 if [[ -z "$XPISODE_STATION" ]]; then
-  echo "run.sh: no robots/*/machine.env has XPISODE_HOST=$(hostname -s); set XPISODE_STATION" >&2
+  echo "run.sh: no station: write its name into .station (echo <station> > .station)" >&2
   exit 1
 fi
 cd "$here"

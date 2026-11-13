@@ -49,11 +49,14 @@ def station_dir(name: str | None) -> Path:
         if not (folder / "can.toml").is_file():
             raise SystemExit(f"no robots/{name}/can.toml")
         return folder
+    marker = SITE / ".station"
+    if marker.is_file() and marker.read_text().strip():
+        return station_dir(marker.read_text().strip())
     host = socket.gethostname().split(".")[0]
     for env in sorted(robots.glob("*/machine.env")):
         if host_of(env) == host:
             return env.parent
-    raise SystemExit(f"no robots/*/machine.env has XPISODE_HOST={host}; give the station name")
+    raise SystemExit("no station: write its name into .station (echo <station> > .station), or give it")
 
 
 def rules(folder: Path) -> tuple[str, list[str]]:

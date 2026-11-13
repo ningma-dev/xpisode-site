@@ -24,7 +24,7 @@ fail() { printf 'FAIL  %-16s %s\n' "$1" "$2"; fails=$((fails + 1)); }
 todo() { printf 'TODO  %-16s %s\n' "$1" "$2"; }
 
 if [[ -z "$XPISODE_STATION" ]]; then
-  fail station "no robots/*/machine.env has XPISODE_HOST=$(hostname -s)"
+  fail station "no station: write its name into .station (echo <station> > .station)"
   exit 1
 fi
 echo "station $XPISODE_STATION on $(hostname -s), user $(id -un)"

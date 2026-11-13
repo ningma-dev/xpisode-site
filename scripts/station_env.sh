@@ -1,7 +1,8 @@
 # Sourced by run.sh, serve.sh and upload.sh: the settings of this machine's station.
 #
-# The station is the robots/<name>/ whose machine.env has XPISODE_HOST = this machine's
-# `hostname -s`; XPISODE_STATION=<name> overrides that. It exports
+# The station is, in order: XPISODE_STATION=<name> in the environment; the name in the repo's
+# .station file (one line, not committed: written once when a machine is set up); the
+# robots/<name>/ whose machine.env has XPISODE_HOST = `hostname -s`. It exports
 #   XPISODE_STATION           the station name = the directory name (empty on a Mac)
 #   XPISODE_STATION_DIR       robots/<name>
 #   XPISODE_STATION_FILE      robots/<name>/station.toml
@@ -17,6 +18,9 @@
 
 _site="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 
+if [[ -z "${XPISODE_STATION:-}" && -s "$_site/.station" ]]; then
+  XPISODE_STATION="$(tr -d '[:space:]' < "$_site/.station")"
+fi
 if [[ -z "${XPISODE_STATION:-}" ]]; then
   _host="$(hostname -s)"
   for _env in "$_site"/robots/*/machine.env; do

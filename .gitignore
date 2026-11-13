@@ -11,3 +11,5 @@ data/
 # Development on the Mac (scripts/dev_link.sh changes only .venv; nothing else to ignore).
 *.local.toml
 .DS_Store
+# Which station this machine is (one line, written at setup)
+/.station
