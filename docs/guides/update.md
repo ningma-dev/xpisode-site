@@ -1,24 +1,30 @@
-# 更新到新版本，或者回退
+# 更新和回退
 
-**一个版本，就是本仓库 `main` 上的一次提交。** 它写定了框架、相机驱动、手臂驱动各用哪个版本，所以每台机器装出来都一样。每条录制也会记下录它时用的是哪个版本。
+**一个版本就是本仓库 `main` 上的一次提交**，它写定了 xpisode、相机驱动、手臂驱动各用哪个版本。机器人电脑上只装版本，不改代码。
 
-机器人电脑上**只装版本，不改代码**。代码在自己的电脑上改，改好推到 GitHub。
+## 更新一台电脑
 
-## 更新一台机器
+1. 在各自的终端里按 Ctrl+C，停掉站点、面板和上传。
+2. 取新版本：
 
-先停掉站点、面板和上传，然后：
+   ```bash
+   cd ~/xpisode-site
+   git pull --ff-only
+   git diff --stat HEAD@{1} -- host robots/$(cat .station)
+   ```
 
-```bash
-cd ~/xpisode-site
-git pull --ff-only
-uv sync --locked
-scripts/build_pinned.sh
-host/doctor.sh
-```
+   如果 `git pull` 报 `Not possible to fast-forward`，说明本机有没推送的提交，和 GitHub 上的分叉了。停下来问负责人。
 
-**成功的样子：** 最后一行 `0 FAIL`。然后重新打开面板和上传（`scripts/serve.sh`、`scripts/upload.sh`），站点由操作员来启动。
+3. 如果上一步列出了文件，说明系统设置或本机配置变了，先运行 `sudo host/setup.sh`。它提示要重启，就重启。
+4. 装上新版本：
 
-如果 `git pull` 提示 `Not possible to fast-forward`，说明这台机器上有人改过文件。停下来问负责人，不要强行覆盖。
+   ```bash
+   uv sync --locked
+   scripts/build_pinned.sh
+   host/doctor.sh
+   ```
+
+**成功的样子：** 最后一行是 `0 FAIL`。然后照[真机验收](acceptance.md#启动)的顺序，重新启动站点、面板和上传。
 
 做完在 `robots/<站点>/LOG.md` 里记一条。
 
@@ -28,21 +34,17 @@ host/doctor.sh
 cd ~/xpisode-site
 git log --oneline -5          # 找到上一个能用的版本
 git checkout <版本号>
-uv sync --locked
-scripts/build_pinned.sh
-host/doctor.sh
+uv sync --locked && scripts/build_pinned.sh && host/doctor.sh
 ```
 
-数据不受影响：录制都在 `~/xpisode-data` 里，不在本仓库里。
+回退期间不要提交，日志等回到 `main` 后再记。数据不受影响，因为录制在 `~/xpisode-data` 里，不在本仓库里。
 
-要回到最新版本：先 `git checkout main`，再从 `uv sync --locked` 开始做一遍。
-
-如果需要长期回退，在自己的电脑上撤销那次改动，再推送。不要让机器一直停在旧版本上。
+回到最新版本：先 `git checkout main`，再运行一遍上面最后一行。
 
 ## 发布一个新版本（开发的人做）
 
 在自己的电脑上：
 
-1. 改 `pyproject.toml` 里要升级的仓库的提交号；
-2. 运行 `uv lock`，然后用 `git diff uv.lock` 看一眼，确认只有预期的包变了；
-3. 提交，推送前问负责人。
+1. 改 `pyproject.toml` 里 `[tool.uv.sources]` 的 `rev`。xpisode 有四行（`xpisode`、`xpisode-format`、`xpisode-device`、`xpisode-env`），要一起改成同一个提交号。
+2. 运行 `uv lock`，再用 `git diff uv.lock` 确认只有预期的包变了。
+3. 提交，推送前先问负责人。

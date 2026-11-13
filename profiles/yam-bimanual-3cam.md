@@ -1,6 +1,6 @@
-# 本体约定 `yam-bimanual-3cam/1`（草稿，待用户定）
+# 本体约定 `yam-bimanual-3cam/1`（草稿，待负责人定）
 
-每台 YAM 站点都声明遵守它（xpisode 的 design/design.md 8.4）。遵守同一约定的站点，数据能放进同一个数据集，checkpoint 能换一台站点跑。下面照 yam_abc 实际录的写（站点文件 2026-11-13，xpisode-i2rt `c458074`、xpisode-realsense `223c00d`）；核心现在还不检查约定，站点文件里只能写成注释。
+YAM 站点都遵守这份约定，所以它们的数据能放进同一个数据集。xpisode 目前不检查约定，站点文件里只写成注释。
 
 ## 设备名
 
@@ -17,8 +17,8 @@
 
 | 流 | 字段 | 单位 | 标称频率 |
 | --- | --- | --- | --- |
-| `/follower_{l,r}/state` | `joint_pos` [6]、`joint_vel` [6]、`joint_eff` [6]、`gripper_pos`、`gripper_vel`、`gripper_eff` | rad、rad/s、N·m；`gripper_pos` 是归一化开度，0 闭合、1 张开（1）；`gripper_vel` 1/s；`gripper_eff` N·m | 200 Hz |
-| `/leader_{l,r}/input` | `joint_pos` [6]、`trigger`、`buttons` [2]、`handle_age` | rad；`trigger` 0 松开、1 按到底（1）；`buttons` 按下为真；`handle_age` s | 200 Hz |
+| `/follower_{l,r}/state` | `joint_pos` [6]、`joint_vel` [6]、`joint_eff` [6]、`gripper_pos`、`gripper_vel`、`gripper_eff` | rad、rad/s、N·m；`gripper_pos` 是归一化开度，0 闭合、1 张开，无单位；`gripper_vel` 1/s；`gripper_eff` N·m | 200 Hz |
+| `/leader_{l,r}/input` | `joint_pos` [6]、`trigger`、`buttons` [2]、`handle_age` | rad；`trigger` 0 松开、1 按到底，无单位；`buttons` 按下为真；`handle_age` s | 200 Hz |
 | `/cam_*/frame` | `color`、`infrared_left`、`infrared_right` | 640×480；彩色 rgb8，红外 y8（录为 FFV1 灰度，无损）；不录深度；曝光固定 32 ms | 30 Hz |
 
 录制必须有上面七条流（站点文件的 `required_streams`）。

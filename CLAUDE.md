@@ -5,8 +5,6 @@
 - **要 sudo 的步骤由用户自己跑**；agent 不 ssh 到机器，除非用户同意。
 - **不提交训练任务。** 用户自己提交。
 - **推 GitHub、写 OSS、删数据，先得到用户同意。** 不建远端仓库、不在 OSS 上建东西。
-- **面板文字要短**：一个词的标签，不写解释句。
-- **核心只记事实**；排名、质量判断、规则检查放在核心外面。
 - **设计文档在 xpisode 框架仓库的 `design/design.md`**，跟着代码改，不写 ADR。本仓库只讲部署。
 - **机器人机器上不开发**：只 `git pull --ff-only`、`uv sync --locked`、`scripts/build_pinned.sh`（`docs/guides/update.md`）。开发在 Mac 上，用 `scripts/dev_link.sh`。
 - **一台机器人一个目录** `robots/<站点>/`（站点文件、主机事实、CAN 序列号、调参、快照、日志），都在 `main` 上；不按机器开分支。
