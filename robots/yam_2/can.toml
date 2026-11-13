@@ -7,9 +7,9 @@
 # Plugged in (2026-11-13, after re-cabling), all candleLight gs_usb 1d50:606f:
 #   20843399594E50182 (USB 1-4, xHCI 0000:0d:00.0)   20973485584550182 (USB 3-4.1, 0000:0f:00.0)
 #   206B3393594E50182 (USB 3-4.2, 0000:0f:00.0)     20743395594E50182 (USB 9-2, 0000:79:00.4)
-# Which serial is which arm is NOT known yet.
+# Mapped on site 2026-11-13 (unplug one at a time).
 
-follower_l = "FILL"
-follower_r = "FILL"
-leader_l = "FILL"
-leader_r = "FILL"
+follower_l = "206B3393594E50182"
+follower_r = "20973485584550182"
+leader_l = "20743395594E50182"
+leader_r = "20843399594E50182"

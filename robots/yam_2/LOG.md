@@ -14,3 +14,7 @@
 - 版本：xpisode-site a9b6bed；xpisode 01d6d59，xpisode-realsense 223c00d，xpisode-i2rt c458074
 - 结果：体检 2 FAIL：tools（还没装 ossutil，第 9 步）、autosuspend（相机仍是 auto，已改规则，待重跑 setup.sh 后验证）；其余 PASS 或 TODO
 - 和文档不一样的地方：中断列表误报、第 7 步耗时和顺序、ssh 下找不到 uv，都已经在文档和脚本里改了
+
+## 2026-11-13 · ningma（现场）+ Claude · 认出每个设备
+- CAN：follower_l 206B3393594E50182，follower_r 20973485584550182，leader_l 20743395594E50182，leader_r 20843399594E50182
+- 相机：cam_head 255323071678，cam_left_wrist 262723072302，cam_right_wrist 260323074516
