@@ -1,5 +1,5 @@
 # Station yam_2 on machine ubuntu2: two YAM pairs, three D405s. Everything specific to this robot
-# is in robots/yam_2/: this file, machine.env (host facts), can.toml (CAN adapter serials),
+# is in robots/yam_2/: this file, can.toml (CAN adapter serials),
 # tuned/ (per-arm tuning), machine.md (snapshot), LOG.md (what was done to it).
 # Profile (本体约定): yam-bimanual-3cam (draft, profiles/yam-bimanual-3cam.md). The station file
 # has no key for it yet (xpisode design/design.md 8.4), so it is declared here as a comment.
@@ -12,13 +12,6 @@
 #     scripts/run.sh --who NAME        (or: .venv/bin/xpisode run robots/yam_2/station.toml --who NAME)
 #
 # Commands run beside this file (robots/yam_2/); every device and client uses the repo's .venv.
-#
-# Cameras: surveyed on ubuntu2 2026-11-13, roles NOT known yet. The operator assigns each serial
-# to cam_head / cam_left_wrist / cam_right_wrist (docs/guides/setup-robot-pc.md) and replaces the
-# FILL values:
-#   260323074516  USB 2-5    xHCI 0000:0d:00.0 (IRQ 45 -> CPU4)
-#   255323071678  USB 4-5.3  ASMedia hub on xHCI 0000:0f:00.0 (IRQ 53 -> CPU5)
-#   262723072302  USB 4-5.4  ASMedia hub on xHCI 0000:0f:00.0 (IRQ 53 -> CPU5)
 #
 # CAN: the channel names are the arm roles, the same on every YAM machine (can_follower_l, ...);
 # udev gives them from can.toml (host/can_rules.py, docs/guides/identify-devices.md).

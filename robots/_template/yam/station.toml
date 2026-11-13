@@ -1,5 +1,5 @@
 # Station FILL: template for a YAM station: two YAM pairs, three D405s. Everything specific to this robot
-# is in robots/<station>/: this file, machine.env (host facts), can.toml (CAN adapter serials),
+# is in robots/<station>/: this file, can.toml (CAN adapter serials),
 # tuned/ (per-arm tuning), machine.md (snapshot), LOG.md (what was done to it).
 # Profile (本体约定): yam-bimanual-3cam (draft, profiles/yam-bimanual-3cam.md). The station file
 # has no key for it yet (xpisode design/design.md 8.4), so it is declared here as a comment.

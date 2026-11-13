@@ -6,7 +6,7 @@
 #     host/doctor.sh [STATION]          exit status: the number of FAIL lines
 #
 # Items: tools, rtprio, memlock, groups, udev-rules, can-rule, can-links, usbfs, autosuspend,
-# data-root, background-cpus, irq-layout, venv, rtcore, panel, station-file, cameras, tuned.
+# data-root, background-cpus, venv, rtcore, panel, station-file, cameras, tuned.
 # TODO is a step not done yet that depends on a fact still marked FILL (CAN map, camera roles,
 # tuning); FAIL is something that should already be right.
 set -uo pipefail
@@ -115,20 +115,9 @@ else
   esac
 fi
 
-# background CPUs and the interrupt layout they were derived from
-if [[ -n "${XPISODE_BACKGROUND_CPUS:-}" ]]; then pass background-cpus "$XPISODE_BACKGROUND_CPUS"; else fail background-cpus "empty (XPISODE_DEVICE_XHCI in machine.env)"; fi
-drift=()
-while read -r pci; do
-  [[ -n "$pci" ]] || continue
-  want=""
-  for entry in "${XPISODE_DEVICE_XHCI[@]}"; do [[ "${entry%% *}" == "$pci" ]] && want="${entry##* }"; done
-  if [[ -z "$want" ]]; then drift+=("$pci:not-in-machine.env"); continue; fi
-  for pair in $(irqs_of "$pci"); do
-    [[ "${pair#*:}" == "$want" ]] || drift+=("$pci:irq${pair%%:*}->cpu${pair#*:}(machine.env:$want)")
-  done
-done < <("$host/xhci_list.sh" --pci)
-if [[ ${#drift[@]} -eq 0 ]]; then pass irq-layout "controllers in use serve their interrupts where machine.env says"
-else fail irq-layout "${drift[*]} (update machine.env, or sudo host/setup.sh --pin-irqs)"; fi
+# background CPUs: computed from where the cameras and CAN adapters are now (scripts/station_env.sh)
+if [[ -n "${XPISODE_BACKGROUND_CPUS:-}" ]]; then pass background-cpus "$XPISODE_BACKGROUND_CPUS (devices on CPU $(device_cpus | paste -sd, -))"
+else fail background-cpus "empty"; fi
 
 # the pinned environment
 py="$site/.venv/bin/python"
@@ -156,10 +145,10 @@ wanted="$(grep -o '"serial": "[^"]*"' "$dir/station.toml" | cut -d'"' -f4 | grep
 if [[ -z "$wanted" ]]; then todo cameras "no camera serials in the station file yet"
 elif [[ ! -x "$site/.venv/bin/python" ]]; then todo cameras "after uv sync --locked"
 else
-  found="$("$site/.venv/bin/python" "$host/camera_serials.py" --serials 2>/dev/null | sort -u)"
+  found="$("$host/devices.sh" --camera-serials 2>/dev/null | sort -u)"
   missing="$(comm -23 <(echo "$wanted") <(echo "$found") | tr '\n' ' ')"
   if [[ -z "$missing" ]]; then pass cameras "all $(echo "$wanted" | wc -l | tr -d ' ') found"
-  else fail cameras "not found: ${missing}(serials must come from host/camera_serials.py)"; fi
+  else fail cameras "not found: ${missing}(take them from host/devices.sh)"; fi
 fi
 untuned=()
 for side in l r; do [[ -f "$dir/tuned/can_follower_$side.json" ]] || untuned+=("follower_$side"); done

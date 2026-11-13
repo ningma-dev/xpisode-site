@@ -35,7 +35,7 @@ xpisode 管"录数据"这条路：
 
 照[准备一台机器人电脑](setup-robot-pc.md)做。那篇和 `host/doctor.sh` 是按 YAM 写的，新机型有几处不同：
 
-- 第 4 步没有现成的模板。参考 `robots/_template/yam/`，自己写 `station.toml`、`machine.env`、`LOG.md`；
+- 第 4 步没有现成的模板。参考 `robots/_template/yam/`，自己写 `station.toml`、`LOG.md`；
 - 没有 CAN 的话，`can.toml` 怎么处理，先和负责人商量；
 - 体检里 `can-*`、`autosuspend`、`tuned` 这几项可能不适用，可以跳过。
 

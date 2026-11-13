@@ -77,9 +77,7 @@ echo <站点> > .station
 cp -r robots/_template/yam robots/<站点>
 ```
 
-然后改两处：
-- `robots/<站点>/station.toml` 里的 `station = "FILL"` 改成站点名；
-- `robots/<站点>/machine.env` 里的 `XPISODE_HOST=FILL` 改成平时 ssh 连这台电脑用的名字。
+然后把 `robots/<站点>/station.toml` 里的 `station = "FILL"` 改成站点名。
 
 设备序列号先留着 `FILL`，第 7 步再填。
 
@@ -115,7 +113,7 @@ scripts/build_pinned.sh
 
 照[认出每个设备](identify-devices.md)做，需要人在电脑旁边拔插 USB 线。
 
-**成功的样子：** `host/doctor.sh` 里 `can-rule`、`can-links`、`irq-layout`、`station-file`、`cameras` 都是 PASS。
+**成功的样子：** `host/doctor.sh` 里 `can-rule`、`can-links`、`station-file`、`cameras` 都是 PASS。
 
 ## 8. 准备数据目录
 

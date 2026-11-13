@@ -34,7 +34,7 @@ override-dependencies = [
 # a symlink to the machine's big disk (docs/guides/setup-robot-pc.md). It is never inside the repo.
 data = "~/xpisode-data"
 # No default_station: each machine runs its own robots/<station>/station.toml, chosen by
-# scripts/station_env.sh from machine.env (XPISODE_HOST); see robots/README.md.
+# scripts/station_env.sh from the repo's .station file.
 
 # Pinned exact commits. Change them only together with uv.lock.
 [tool.uv.sources]
