@@ -2,7 +2,7 @@
 # is in robots/yam_2/: this file, machine.env (host facts), can.toml (CAN adapter serials),
 # tuned/ (per-arm tuning), machine.md (snapshot), LOG.md (what was done to it).
 # Profile (本体约定): yam-bimanual-3cam (draft, profiles/yam-bimanual-3cam.md). The station file
-# has no key for it yet (design.md 8.4), so it is declared here as a comment.
+# has no key for it yet (xpisode design/design.md 8.4), so it is declared here as a comment.
 #
 # Provenance: copied from yam_abc.toml (the old station, 2026-11-13). Rates, resolution,
 # exposure, frame fields, groups, buttons, clients and transforms are kept as on yam_abc.

@@ -20,7 +20,7 @@ one. It reads the station's status (what the panel reads) and says, in Chinese:
   once per Episode a missed return to ready or too few gripper cycles:
   "上一条：没有回到准备位".
 
-xpisode only records these facts; telling people is this program's business (design.md §9). Speech
+xpisode only records these facts; telling people is this program's business (xpisode design/design.md §9). Speech
 goes through spd-say (speech-dispatcher) in Chinese, else espeak-ng, else the terminal. Names
 read better through --names, a TOML table of device name to spoken name.
 """

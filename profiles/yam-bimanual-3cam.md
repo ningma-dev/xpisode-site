@@ -1,6 +1,6 @@
 # 本体约定 `yam-bimanual-3cam/1`（草稿，待用户定）
 
-每台 YAM 站点都声明遵守它（design.md 8.4）。遵守同一约定的站点，数据能放进同一个数据集，checkpoint 能换一台站点跑。下面照 yam_abc 实际录的写（站点文件 2026-11-13，xpisode-i2rt `c458074`、xpisode-realsense `223c00d`）；核心现在还不检查约定，站点文件里只能写成注释。
+每台 YAM 站点都声明遵守它（xpisode 的 design/design.md 8.4）。遵守同一约定的站点，数据能放进同一个数据集，checkpoint 能换一台站点跑。下面照 yam_abc 实际录的写（站点文件 2026-11-13，xpisode-i2rt `c458074`、xpisode-realsense `223c00d`）；核心现在还不检查约定，站点文件里只能写成注释。
 
 ## 设备名
 
