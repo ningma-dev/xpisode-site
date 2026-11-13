@@ -13,7 +13,7 @@
 # (XPISODE_DEVICE_XHCI in machine.env: cameras and CAN) and their SMT siblings, read from sysfs.
 # XPISODE_BACKGROUND_CPUS already in the environment, or set in machine.env, wins.
 # Measure the controllers' CPUs on each machine with host/xhci_list.sh
-# (docs/runbooks/add-machine.md).
+# (docs/guides/setup-robot-pc.md).
 
 _site="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 

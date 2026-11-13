@@ -101,7 +101,7 @@ done
 
 echo "udev: CAN names (host/can_rules.py, robots/$XPISODE_STATION/can.toml)"
 if ! python3 "$host/can_rules.py" "$XPISODE_STATION"; then
-  echo "  skipped    map the adapters first (docs/runbooks/map-can.md), then run this again"
+  echo "  skipped    map the adapters first (docs/guides/identify-devices.md), then run this again"
 fi
 
 echo "udev: USB power, D405 access, FTDI latency"

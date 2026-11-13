@@ -1,6 +1,6 @@
 # xpisode-site: the team's deployment project. Every robot machine installs exactly the
 # versions pinned here (`uv sync --locked`); nobody develops on a robot machine.
-# Bump a pin: change the rev below, `uv lock`, commit both files (docs/runbooks/deploy.md).
+# Bump a pin: change the rev below, `uv lock`, commit both files (docs/guides/update.md).
 
 [project]
 name = "xpisode-site"
@@ -31,7 +31,7 @@ override-dependencies = [
 
 [tool.xpisode]
 # The data root is outside this repository on every machine: ~/xpisode-data is a directory or
-# a symlink to the machine's big disk (docs/runbooks/add-machine.md). It is never inside the repo.
+# a symlink to the machine's big disk (docs/guides/setup-robot-pc.md). It is never inside the repo.
 data = "~/xpisode-data"
 # No default_station: each machine runs its own robots/<station>/station.toml, chosen by
 # scripts/station_env.sh from machine.env (XPISODE_HOST); see robots/README.md.

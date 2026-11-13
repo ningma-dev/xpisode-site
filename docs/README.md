@@ -1,23 +1,39 @@
 # 文档
 
-| 文件 | 是什么 |
+## 我要……
+
+| 要做的事 | 看这篇 |
 | --- | --- |
-| [design.md](design.md) | **唯一的设计文档**。原则、维护规则 M1–M9（第 3 节）、多台机器一个 OSS（7.6）、本体约定（8.4）。不另写 ADR |
-| [requirements.md](requirements.md) | 穷举的需求 |
-| [rules.md](rules.md) | 每种角色一张规则卡 |
-| [launch.md](launch.md) | 上线清单和真机验收表（第 3 节） |
-| [day1.md](day1.md) | 第一天的流程（11-12 计划，没录成） |
-| [methods/](methods/) | 训练服务器、ACT / π0.5 笔记、评测计划模板 |
-| [runbooks/add-machine.md](runbooks/add-machine.md) | 加一台机器、重装一台机器（按 ubuntu3 / yam_3 写好） |
-| [runbooks/map-can.md](runbooks/map-can.md) | CAN 适配器对手臂 |
-| [runbooks/deploy.md](runbooks/deploy.md) | 把钉住的版本装到机器上；回滚 |
-| [onboarding/new-robot.md](onboarding/new-robot.md) | 接入一种新机器人（给 Tron2 的同事） |
+| 准备一台新的机器人电脑，或者重装一台 | [准备一台机器人电脑](guides/setup-robot-pc.md) |
+| 换了适配器、线或相机，要重新对上 | [认出每个设备](guides/identify-devices.md) |
+| 给手臂调参（要人在场） | [给手臂调参](guides/tune-arm.md) |
+| 把机器更新到新版本，或者回退 | [更新和回退](guides/update.md) |
+| 接入一种新机器人 | [接入一种新机器人](guides/new-robot-type.md) |
+| 弄明白本仓库为什么这么放 | [本仓库是怎么组织的](how-it-works.md) |
 
-前六项是 2026-11-13 从旧站点工作区交接包原样搬来的。里面的 `repos/xpisode`、`~/xpisode`、`/home/ubuntu/archive`、`deployments/`、`archive/` 指的是旧工作区和旧站点机，现在都不在了：代码看 GitHub 上的三个仓库（版本见 `pyproject.toml`），旧数据都在 OSS 上。字段、消息、路径的精确定义在框架仓库的 `docs/reference/`。
+## 背景资料
 
-## 运维文档怎么积累
+[`background/`](background/) 里是从旧站点搬过来的资料：设计文档、需求、规则卡、上线清单和验收表、第一天的采集流程、训练服务器的笔记。里面提到的旧路径（`~/xpisode`、`repos/…`）已经不存在了。
 
-1. **手册在 `runbooks/`**。每一步写：确切的命令、谁来跑（操作员用 sudo / 操作员 / agent 经 ssh / Mac）、"应该看到"什么。写到没有背景的人也能照着做。
-2. **能写成脚本的写成脚本，再配一个检查。** 检查是 `host/doctor.sh`（只读，每项 PASS / FAIL / TODO）；每一步的结尾是"跑 `host/doctor.sh`，某项应为 PASS"。
-3. **每台机器人有 `robots/<站点>/LOG.md`**，每次操作都追加一条：日期、谁、哪个手册第几步、版本、结果、和文档不一样的地方。**某一步失败或文档写错了，就在记这条日志的同一个提交里把手册改对。**
-4. **机器事实有快照**：`host/snapshot.sh`（只读）的输出存为 `robots/<站点>/machine.md`；重装后再跑一次和它对照。
+其中设计文档 `background/design.md` 只有这一份，改设计就改它，不另写别的设计记录。
+
+## 记日志
+
+每在一台机器上做一件事，就在 `robots/<站点>/LOG.md` 末尾加一条：
+
+```markdown
+## 2026-11-14 · 名字 · 准备一台机器人电脑，第 1–11 步
+- 结果：体检 0 FAIL，调参还没做
+- 和文档不一样的地方：第 5 步……（已经改了文档）
+```
+
+## 写文档的规矩
+
+文档写给以后的一个人：他没有背景，要照着把事做成。
+
+1. **一篇只讲一件事**，开头一句话说清它做什么、什么时候用。
+2. **通用，不写具体机器的数值。** 用 `<站点>` 这样的占位符，数值放在 `robots/<站点>/` 里。
+3. **每一步写三样：** 为什么做（一句话就够），要运行的命令，成功是什么样子。
+4. **说人话。** 术语能不用就不用；非用不可，第一次出现时用一句话解释。
+5. **不写历史，不写实现细节。** "为什么这么设计"放进 [how-it-works.md](how-it-works.md) 或设计文档。
+6. **照着做时发现文档不对，就在同一次提交里把它改对。** 不要先绕过去，打算以后再改。

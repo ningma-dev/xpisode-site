@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build the two things a git-pinned `uv sync` cannot install, at exactly the commits pinned in
-# pyproject.toml. Run it after every `uv sync --locked` that changed a pin (docs/runbooks/deploy.md).
+# pyproject.toml. Run it after every `uv sync --locked` that changed a pin (docs/guides/update.md).
 #
 #   rtcore   xpisode-i2rt's Rust controller, built from local/build/xpisode-i2rt and installed
 #            where the installed package looks for it (xpisode_i2rt.core.default_binary(); in

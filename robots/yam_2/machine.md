@@ -2,7 +2,7 @@
 
 Hand-written from the survey of 2026-11-13 (read-only, after re-cabling), in the sections of
 host/snapshot.sh. Replace it with `host/snapshot.sh > robots/yam_2/machine.md` at setup
-(docs/runbooks/add-machine.md step 13).
+(docs/guides/setup-robot-pc.md step 11).
 
 ## System
 

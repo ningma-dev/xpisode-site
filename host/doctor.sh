@@ -67,7 +67,7 @@ for role in tomllib.load(open(sys.argv[1], "rb")):
 PY
 )
 if grep -q '"FILL' "$dir/can.toml"; then
-  todo can-rule "can.toml still has FILL (docs/runbooks/map-can.md)"
+  todo can-rule "can.toml still has FILL (docs/guides/identify-devices.md)"
   todo can-links "after the CAN map"
 else
   check="$(python3 "$host/can_rules.py" "$XPISODE_STATION" --check 2>&1)"

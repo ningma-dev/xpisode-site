@@ -14,14 +14,14 @@
 # Commands run beside this file (robots/yam_2/); every device and client uses the repo's .venv.
 #
 # Cameras: surveyed on ubuntu2 2026-11-13, roles NOT known yet. The operator assigns each serial
-# to cam_head / cam_left_wrist / cam_right_wrist (docs/runbooks/add-machine.md) and replaces the
+# to cam_head / cam_left_wrist / cam_right_wrist (docs/guides/setup-robot-pc.md) and replaces the
 # FILL values:
 #   260323074516  USB 2-5    xHCI 0000:0d:00.0 (IRQ 45 -> CPU4)
 #   255323071678  USB 4-5.3  ASMedia hub on xHCI 0000:0f:00.0 (IRQ 53 -> CPU5)
 #   262723072302  USB 4-5.4  ASMedia hub on xHCI 0000:0f:00.0 (IRQ 53 -> CPU5)
 #
 # CAN: the channel names are the arm roles, the same on every YAM machine (can_follower_l, ...);
-# udev gives them from can.toml (host/can_rules.py, docs/runbooks/map-can.md).
+# udev gives them from can.toml (host/can_rules.py, docs/guides/identify-devices.md).
 #
 # Tuning: tuned/ here must be measured on these arms (robots/README.md). Until then the followers
 # cannot open. yam_abc's files (robots/_archive/yam_abc/tuned/) do not describe these arms.

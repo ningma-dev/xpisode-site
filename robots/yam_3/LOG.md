@@ -1,6 +1,6 @@
 # yam_3 日志
 
-每次在这台机器上做事，在末尾追加一条：日期、谁、哪个 runbook 第几步、版本、结果、和文档不一样的地方。某一步失败或文档写错了，就在记这条的同一个提交里改 runbook（docs/README.md）。
+每在这台机器上做一件事，就在末尾加一条。格式见 [docs/README.md](../../docs/README.md#记日志)。
 
 ## 2026-11-13 · agent（经协调者）· 只读调查
 - 机器 ubuntu3：Ubuntu 24.04.5，内核 7.0.0-43 PREEMPT_DYNAMIC，9800X3D 8C/16T，59 GiB，RTX 5090（驱动 595.99，CUDA 13.2），NVMe 3.1 T 空闲。详见 machine.md。

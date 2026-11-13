@@ -2,7 +2,7 @@
 # (host/can_rules.py). The channel names are the role names, can_<role>, the same on every YAM
 # machine; only the serials differ. can_rules.py refuses while one is FILL or two are the same.
 # A serial names the adapter, not the arm: label each adapter and its cable with the arm name and
-# keep them together. Map them with docs/runbooks/map-can.md (unplug one at a time), never from
+# keep them together. Map them with docs/guides/identify-devices.md (unplug one at a time), never from
 # port order.
 # Plugged in (2026-11-13, after re-cabling), all candleLight gs_usb 1d50:606f:
 #   20843399594E50182 (USB 1-4, xHCI 0000:0d:00.0)   20973485584550182 (USB 3-4.1, 0000:0f:00.0)

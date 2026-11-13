@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Read-only: every gs_usb CAN adapter (candleLight 1d50:606f) plugged in now, with its serial,
 # its network interface's current name, its USB path and host controller. Changes nothing.
-# To tell which adapter is which arm: run it, unplug one adapter, run it again (docs/runbooks/map-can.md).
+# To tell which adapter is which arm: run it, unplug one adapter, run it again (docs/guides/identify-devices.md).
 #     host/can_list.sh
 set -euo pipefail
 source "$(dirname -- "${BASH_SOURCE[0]}")/usb_lib.sh"
