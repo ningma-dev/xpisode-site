@@ -1,5 +1,8 @@
 # xpisode: keep the D405s and the CAN adapters out of USB autosuspend (the kernel default here is
 # usbcore.autosuspend=2), and keep ModemManager from probing the CAN adapters.
 ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="8086", ATTR{idProduct}=="0b5b", TEST=="power/control", ATTR{power/control}="on"
+# uvcvideo turns autosuspend back on when it binds a camera interface, after the line above ran,
+# so set it again on that bind.
+ACTION=="bind", SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_interface", DRIVER=="uvcvideo", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="0b5b", RUN+="/bin/sh -c 'echo on > /sys%p/../power/control'"
 ACTION=="add|change", SUBSYSTEM=="usb", ATTR{idVendor}=="1d50", ATTR{idProduct}=="606f", TEST=="power/control", ATTR{power/control}="on"
 ACTION=="add|change", SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="606f", ENV{ID_MM_DEVICE_IGNORE}="1"

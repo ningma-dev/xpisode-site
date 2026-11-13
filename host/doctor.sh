@@ -31,7 +31,8 @@ echo "station $XPISODE_STATION on $(hostname -s), user $(id -un)"
 [[ $EUID -ne 0 ]] || echo "(running as root: rtprio, memlock and groups below are root's, not the user's)"
 dir="$XPISODE_STATION_DIR"
 
-# tools
+# tools (uv and cargo live in the user's home; a non-login shell may not have them on PATH)
+PATH="$PATH:$HOME/.local/bin:$HOME/.cargo/bin"
 missing=()
 for tool in git curl gcc make ffmpeg cansend candump uv cargo python3; do
   command -v "$tool" >/dev/null || missing+=("$tool")
