@@ -12,3 +12,8 @@
 - 相机：cam_head 262622273092，cam_left_wrist 262622274566，cam_right_wrist 262422273602（和旧站点 yam_abc 的三台相同，位置也相同）
 - CAN：leader_l 20743393594E50182，leader_r 207D346D584550172，follower_l 207D3463584550182（左右和旧站点 yam_abc 相反，现场确认是对调了）。follower_r 的适配器不在 USB 上，没填
 - 补上 follower_r 20823393594E50182（插上后是 can3，USB 3-4.1）
+
+## 2026-11-14 · ningma + Claude · 任务和计划
+- 任务：stack_bowls 新版本（三只大小不同的碗，2 分钟），fold_shirt 新建（T 恤、长袖或卫衣，平铺开始，3 分钟），sort_legos 用原有版本
+- 计划，各 50 行，站点 yam_1，判断人 jianping_yin：stack_bowls_yam_1_1114、sort_legos_yam_1_1114、fold_shirt_yam_1_1114（判断时问"衣服"：T恤 / 长袖 / 卫衣）
+- 写在 ubuntu1 本机，配好 OSS 钥匙、开着上传以后会推到 OSS
