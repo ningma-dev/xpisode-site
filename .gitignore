@@ -13,3 +13,6 @@ data/
 .DS_Store
 # Which station this machine is (one line, written at setup)
 /.station
+
+# Agent worktrees
+/.claude/
