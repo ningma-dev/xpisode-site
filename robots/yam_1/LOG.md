@@ -17,3 +17,8 @@
 - 任务：stack_bowls 新版本（三只大小不同的碗，2 分钟），fold_shirt 新建（T 恤、长袖或卫衣，平铺开始，3 分钟），sort_legos 用原有版本
 - 计划，各 50 行，站点 yam_1，判断人 jianping_yin：stack_bowls_yam_1_1114、sort_legos_yam_1_1114、fold_shirt_yam_1_1114（判断时问"衣服"：T恤 / 长袖 / 卫衣）
 - 写在 ubuntu1 本机，配好 OSS 钥匙、开着上传以后会推到 OSS
+
+## 2026-11-14 · ningma + Claude · 换成 RoboDojo 的九个任务
+- 删掉了上午建的三个计划，以及 stack_bowls、fold_shirt 的新版本、sort_legos 的本机副本（都没上过 OSS）
+- 新建任务（来自 RoboDojo 真机任务，instruction 照原文）：cap_pen、hang_mugs、sweep_blocks、fill_pen_holder、stack_and_cover_blocks、stack_bowls、stand_up_bottles、pack_and_pour_fruit、cover_blocks。stack_bowls、hang_mugs 接在 OSS 上旧版本之后
+- 写在 ubuntu1 本机，还没有计划
