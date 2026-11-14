@@ -22,3 +22,4 @@
 - 删掉了上午建的三个计划，以及 stack_bowls、fold_shirt 的新版本、sort_legos 的本机副本（都没上过 OSS）
 - 新建任务（来自 RoboDojo 真机任务，instruction 照原文）：cap_pen、hang_mugs、sweep_blocks、fill_pen_holder、stack_and_cover_blocks、stack_bowls、stand_up_bottles、pack_and_pour_fruit、cover_blocks。stack_bowls、hang_mugs 接在 OSS 上旧版本之后
 - 写在 ubuntu1 本机，还没有计划
+- 九个任务的 description 加上了 RoboDojo 的部分得分档；建计划时用判断时的"得分"选项记下来（替换了上一版，上一版没上过 OSS）
