@@ -11,3 +11,4 @@
 ## 2026-11-14 · ningma（现场）+ Claude · 认出每个设备（相机）
 - 相机：cam_head 262622273092，cam_left_wrist 262622274566，cam_right_wrist 262422273602（和旧站点 yam_abc 的三台相同，位置也相同）
 - CAN：leader_l 20743393594E50182，leader_r 207D346D584550172，follower_l 207D3463584550182（左右和旧站点 yam_abc 相反，现场确认是对调了）。follower_r 的适配器不在 USB 上，没填
+- 补上 follower_r 20823393594E50182（插上后是 can3，USB 3-4.1）
