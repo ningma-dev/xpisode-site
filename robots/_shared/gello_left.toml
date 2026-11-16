@@ -1,0 +1,31 @@
+# The GELLO teleop client for the left pair (xpisode_abc_gello.teleop).
+# Joints follow one to one once any takeover gap has closed; the gripper opening is 1 - trigger,
+# joined by abc's rule; the follower's grip comes back as resistance on the trigger.
+group = "left"
+leader_group = "leader_left"
+converge_rate = 0.5    # 0: abc's fixed offset, never closing
+still_rad = 0.003      # leader motion per tick below this is encoder jitter
+stale_s = 0.1
+
+[[follow]]
+target = "follower_l/joint_position/joint_pos"
+source = "leader_l/input/joint_pos"
+state = "follower_l/state/joint_pos"
+
+[[follow]]
+target = "follower_l/joint_position/gripper_pos"
+source = "leader_l/input/trigger"
+state = "follower_l/state/gripper_pos"
+scale = -1.0
+offset = 1.0
+takeover = "gripper"
+
+[feedback]
+target = "leader_l/trigger_feedback/trigger_torque"
+effort = "follower_l/state/gripper_eff"
+velocity = "follower_l/state/gripper_vel"
+# From 80 recorded episodes: still and open |effort| < 0.2 (p99); pressing on something 1.03,
+# steady; moving, up to 2.4 from acceleration. So: past 0.3, only while nearly still.
+deadband = 0.3
+gain = 0.1
+still_speed = 0.2

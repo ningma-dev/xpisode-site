@@ -10,6 +10,7 @@ dependencies = [
   "xpisode",
   "xpisode-realsense",
   "xpisode-i2rt",
+  "xpisode-abc-gello",
   # Every package that [tool.uv.sources] places is listed here too: uv applies a project's
   # sources to its own dependencies only.
   "xpisode-format",
@@ -44,6 +45,7 @@ xpisode-device = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "0
 xpisode-env = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "01d6d596408702c1feea81860ca3432d3263adc2", subdirectory = "packages/xpisode-env" }
 xpisode-realsense = { git = "ssh://git@github.com/ningma-dev/xpisode-realsense.git", rev = "223c00d192fe4bc668abe096be6d292023a145c0" }
 xpisode-i2rt = { git = "ssh://git@github.com/ningma-dev/xpisode-i2rt.git", rev = "c458074178b99bb0dac2cdbb18d1f2926338c28c" }
+xpisode-abc-gello = { git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git", rev = "19f91e3039567e4d062b130c2d2a857ff6a7cbcc" }
 
 [dependency-groups]
 # The adapters' tests can run in this environment too.
