@@ -6,7 +6,7 @@
 #     host/doctor.sh          exit status: the number of FAIL lines; the station is .station's
 #
 # Items: tools, rtprio, memlock, groups, udev-rules, can-rule, can-links, usbfs, autosuspend,
-# data-root, background-cpus, venv, rtcore, panel, station-file, cameras, tuned.
+# data-root, background-cpus, venv, rtcore, panel, station-file, cameras, tuned, gello.
 # TODO is a step not done yet that depends on a fact still marked FILL (CAN map, camera roles,
 # tuning); FAIL is something that should already be right.
 set -uo pipefail
@@ -158,6 +158,24 @@ fi
 untuned=()
 for side in l r; do [[ -f "$dir/tuned/can_follower_$side.json" ]] || untuned+=("follower_$side"); done
 if [[ ${#untuned[@]} -eq 0 ]]; then pass tuned "both followers"; else todo tuned "not measured: ${untuned[*]} (robots/README.md, operator window)"; fi
+# every GELLO leader in a station file here has its calibration (docs/guides/gello.md)
+gellos="$(python3 - "$dir" <<'PY'
+import json, sys, tomllib
+from pathlib import Path
+for path in sorted(Path(sys.argv[1]).glob("*.toml")):
+    for device in tomllib.load(open(path, "rb")).get("devices", []):
+        command = device.get("command", [])
+        if "xpisode_abc_gello:GelloLeader" in command:
+            config = json.loads(command[command.index("--config") + 1])
+            print(path.name, device["name"], config.get("calibration", ""))
+PY
+)"
+while read -r station_file device calibration; do
+  [[ -z "$station_file" ]] && continue
+  if [[ -z "$calibration" ]]; then fail gello "$station_file $device: no calibration in its config"
+  elif [[ -f "$dir/$calibration" ]]; then pass gello "$station_file $device: $calibration"
+  else todo gello "$station_file $device: not calibrated (scripts/gello.sh $device calibrate --file $station_file)"; fi
+done <<< "$gellos"
 
 echo "$fails FAIL"
 exit "$fails"

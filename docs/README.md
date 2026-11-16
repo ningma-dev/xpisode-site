@@ -5,6 +5,7 @@
 | 准备一台新的机器人电脑，或者重装一台 | [准备一台机器人电脑](guides/setup-robot-pc.md) |
 | 换了适配器、线或相机，要重新对上 | [认出每个设备](guides/identify-devices.md) |
 | 给手臂调参 | [给手臂调参](guides/tune-arm.md) |
+| 装好一台 GELLO 主臂，设编号、标定 | [装一台 GELLO 主臂](guides/gello.md) |
 | 开始采集前确认机器人工作正常 | [真机验收](guides/acceptance.md) |
 | 把机器更新到新版本，或者回退 | [更新和回退](guides/update.md) |
 | 接入一种新机器人 | [接入一种新机器人](guides/new-robot-type.md) |

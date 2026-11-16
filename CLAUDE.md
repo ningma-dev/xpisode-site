@@ -11,6 +11,6 @@
 - **机器事实不猜**：相机位置、CAN 对哪条臂、中断在哪个核，没确认就留 `FILL`。
 - **密钥只在本地文件里**（`~/.ossutilconfig`、`~/.ssh/`），绝不进仓库、日志、记忆。
 - 数据根不在仓库里（`~/xpisode-data`）。
-- **每件事一个入口**：机器人电脑上只用 `scripts/` 里的 `.sh`（起站点、面板、OSS、调参、存姿态、相机对照），不直接跑 `.venv/bin/xpisode`、`scripts/oss.py`、`xpisode_i2rt.tune`、`xpisode_env.move`、`tools/camera/rs_bare.py`；站点只从 `.station` 来，站点的事实（序列号、控制组、输出路径）只从站点文件和 `robots/<站点>/` 来，不手抄。新加一种做法时，替换旧的，不并存。
+- **每件事一个入口**：机器人电脑上只用 `scripts/` 里的 `.sh`（起站点、面板、OSS、调参、GELLO、存姿态、相机对照），不直接跑 `.venv/bin/xpisode`、`scripts/oss.py`、`xpisode_i2rt.tune`、`xpisode_env.move`、`tools/camera/rs_bare.py`；站点只从 `.station` 来，站点的事实（序列号、控制组、输出路径）只从站点文件和 `robots/<站点>/` 来，不手抄。新加一种做法时，替换旧的，不并存。
 - **在机器上做的每件事记进 `robots/<站点>/LOG.md`**：日期、谁、哪篇文档第几步、版本、结果、和文档不一样的地方。**某一步失败或文档写错了，在记日志的同一个提交里把文档改对。**
 - **写文档前先读 `docs/README.md` 最后一节"写文档的规矩"**：通用、不写具体机器的数值、说人话、一篇一件事。操作文档在 `docs/guides/`。

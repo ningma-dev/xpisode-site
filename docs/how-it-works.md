@@ -42,6 +42,7 @@ robots/<站点>/
 | `scripts/run.sh` | 启动站点；`--file` 选本站点目录里的另一个站点文件 | 手臂会动，要有人在场 |
 | `scripts/serve.sh` | 网页面板 | 不会 |
 | `scripts/tune.sh` | 给一条跟随臂调参，结果存到本站点的 `tuned/` | 手臂会动，要有人在场 |
+| `scripts/gello.sh` | GELLO 主臂：设舵机编号、标定、检查 | 不会；手臂不动，只用 GELLO |
 | `scripts/save_pose.sh` | 把手臂现在的位置存成预设姿态（站点要在运行） | 不会 |
 | `scripts/camera_baseline.sh` | 相机丢帧对照组（`tools/camera/`） | 会打开相机，要约好时间 |
 | `scripts/oss.sh` | 和 OSS 之间的一切：`push --follow` 是自动上传，`status` 看还有什么没传 | 不会 |

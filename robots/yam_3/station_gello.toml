@@ -4,9 +4,9 @@
 #     scripts/run.sh --file station_gello.toml --who NAME
 #
 # Differences from station.toml:
-# - leader_l is the GELLO on its U2D2 (FTDI serial FTBPFNFF, motor IDs 10-16 at 2 Mbaud). It must
-#   be in its calibration pose when the station starts: arm joints at the YAM's zero, trigger
-#   released; a joint more than 15 deg off refuses to open and says which.
+# - leader_l is the GELLO on its U2D2 (FTDI serial FTBPFNFF, motor IDs 10-16 at 2 Mbaud), read
+#   through its calibration, tuned/gello_leader_l.json (scripts/gello.sh leader_l calibrate
+#   --file station_gello.toml, docs/guides/gello.md). It opens in any pose.
 # - teleop_left is xpisode_abc_gello.teleop (../_shared/gello_left.toml): a takeover keeps the
 #   follower where it is and closes the gap as the GELLO moves; the follower's grip is felt on
 #   the trigger. The GELLO cannot be driven, so leader_left holds its trigger feedback, not a pose.
@@ -37,7 +37,7 @@ command = ["../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--stati
 name = "leader_l"
 exclusive = ["serial:FTBPFNFF"]
 command = ["../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
-           "--factory", "xpisode_abc_gello:GelloLeader", "--config", '{"device": "/dev/serial/by-id/usb-FTDI_USB__-__Serial_Converter_FTBPFNFF-if00-port0", "servo_ids": [10, 11, 12, 13, 14, 15, 16]}']
+           "--factory", "xpisode_abc_gello:GelloLeader", "--config", '{"device": "/dev/serial/by-id/usb-FTDI_USB__-__Serial_Converter_FTBPFNFF-if00-port0", "servo_ids": [10, 11, 12, 13, 14, 15, 16], "calibration": "tuned/gello_leader_l.json"}']
 
 [[devices]]
 name = "leader_r"
