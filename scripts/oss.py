@@ -18,6 +18,9 @@ Run it through scripts/oss.sh, on any machine (it needs this repo's .venv):
                                                       newest first, and evict when under
                                                       100 GB are free
     scripts/oss.sh pull                               bring down the small things OSS has
+    scripts/oss.sh pull --records                     only the records (tasks, plans, people,
+                                                      judgments, runs), as push --follow does
+                                                      every minute
     scripts/oss.sh pull --dataset ID [--link --mount /mnt/data_oss/xpisode_data]
                                                       and the recordings a dataset needs
     scripts/oss.sh pull --run ID                      a run's files (a checkpoint) and the
@@ -143,6 +146,7 @@ WHO = "oss.py"
 FREE_AFTER_S = 600.0
 FOLLOW_SCAN_S = 60.0
 FOLLOW_RECONCILE_S = 6 * 3600.0
+FOLLOW_RECORDS_S = 60.0
 FOLLOW_RECORD_S = 3600.0
 FOLLOW_EVICT_S = 600.0
 FOLLOW_RETRY_S = 30.0
@@ -1208,20 +1212,24 @@ def follow(
     scan_s: float = FOLLOW_SCAN_S,
     reconcile_s: float = FOLLOW_RECONCILE_S,
     record_s: float = FOLLOW_RECORD_S,
+    records_s: float = FOLLOW_RECORDS_S,
     evict_below: int | None = None,
     rounds: int | None = None,
     budget_s: float = SEGMENT_EVERY_S,
 ) -> None:
     """Push, newest Episodes first, for at most ``budget_s`` a round, so that a recording
     sealed meanwhile goes before the older backlog; after a round that sent nothing, wait
-    for a write (at most ``scan_s``: the time rules). Pull the small things at start and
-    every ``reconcile_s``. One run record per ``record_s`` of uploads, and one at the end.
+    for a write (at most ``scan_s``: the time rules). Pull the records (tasks, plans,
+    people, judgments, runs; not other stations' Episodes) every ``records_s``, so what the
+    team writes centrally shows here within a minute or two; check the index every
+    ``reconcile_s``. One run record per ``record_s`` of uploads, and one at the end.
     With ``evict_below``, whenever the disk has fewer free bytes, ``evict`` (7 days, as
     much as is missing; at most every 10 minutes). ``rounds``: stop after that many."""
     writes = Writes(panel)
     uploaded: list[Local] = []
     started = time.time_ns()
     reconciled: float | None = None
+    pulled: float | None = None
     evicted: float | None = None
     done = 0
 
@@ -1234,8 +1242,10 @@ def follow(
     try:
         while rounds is None or done < rounds:
             try:
+                if pulled is None or time.monotonic() - pulled >= records_s:
+                    pull(root, remote, episodes=False)
+                    pulled = time.monotonic()
                 if reconciled is None or time.monotonic() - reconciled >= reconcile_s:
-                    pull(root, remote)
                     if missing := unindexed(root, remote):
                         print(f"{len(missing)} records on OSS are in no index segment: indexing")
                         owe(root, missing)
@@ -1436,10 +1446,14 @@ def remote_state(root: Path, remote: str, *, config: Path | None = None) -> Remo
     return Remote(sizes, index.record_of(), thumbnails, index)
 
 
-def pull(root: Path, remote: str, *, config: Path | None = None) -> list[str]:
+def pull(
+    root: Path, remote: str, *, config: Path | None = None, episodes: bool = True
+) -> list[str]:
     """Bring down every small thing OSS has and this store lacks, then apply deletion
     records. A key on both sides with two sizes (a record: two contents) stops it before
-    anything is copied."""
+    anything is copied. Without ``episodes`` the sidecars and thumbnails of Episodes
+    recorded elsewhere stay up: a station needs the team's tasks and plans, not a list of
+    every robot's recordings."""
     state = remote_state(root, remote, config=config)
     there = state.sizes
     records = {m.group(1) for k in there if (m := RUN_RECORD.match(k))}
@@ -1448,6 +1462,8 @@ def pull(root: Path, remote: str, *, config: Path | None = None) -> list[str]:
     known: list[tuple[str, int]] = []
     for key, size in sorted(there.items()):
         if ignored(key) or not small(key):
+            continue
+        if not episodes and key.startswith("episodes/"):
             continue
         output = RUN_OUTPUT.match(key)
         if output and output.group(2) not in records:
@@ -1473,10 +1489,12 @@ def pull(root: Path, remote: str, *, config: Path | None = None) -> list[str]:
         with open(no_thumbnails_path(root, remote), "a") as file:
             file.write("".join(f"{k}\n" for k in missing))
     removed = apply_deletions(root)
-    print(
-        f"pulled {len(copied)} small files from {remote}"
-        + (f"; removed {len(removed)} deleted Episodes here" if removed else "")
-    )
+    if copied or removed or episodes:  # the minutely records pull says nothing when idle
+        print(
+            f"pulled {len(copied)} small files from {remote}"
+            + (f"; removed {len(removed)} deleted Episodes here" if removed else ""),
+            flush=True,
+        )
     return copied
 
 
@@ -2056,6 +2074,12 @@ def main(argv: list[str] | None = None) -> None:
     q.add_argument(
         "--only", metavar="PATH", help="with --run: of its own files just this file or folder"
     )
+    q.add_argument(
+        "--records",
+        action="store_true",
+        help="only records (tasks, plans, people, judgments, runs): not the sidecars and "
+        "thumbnails of Episodes recorded elsewhere; what a station pulls",
+    )
     q.add_argument("--link", action="store_true", help="link big files to --mount, not copy")
     q.add_argument("--mount", type=Path, default=MOUNT, help=f"read-only data root ({MOUNT})")
     d = commands.add_parser("delete")
@@ -2090,7 +2114,7 @@ def main(argv: list[str] | None = None) -> None:
         if target is None:
             if args.link:
                 raise SystemExit("--link goes with --dataset or --run")
-            pull(root, remote)
+            pull(root, remote, episodes=not args.records)
         else:
             if args.with_episodes and args.run is None:
                 raise SystemExit("--with-episodes goes with --run")

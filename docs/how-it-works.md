@@ -45,7 +45,7 @@ robots/<站点>/
 | `scripts/gello.sh` | GELLO 主臂：设舵机编号、标定、检查 | 不会；手臂不动，只用 GELLO |
 | `scripts/save_pose.sh` | 把手臂现在的位置存成预设姿态（站点要在运行） | 不会 |
 | `scripts/camera_baseline.sh` | 相机丢帧对照组（`tools/camera/`） | 会打开相机，要约好时间 |
-| `scripts/oss.sh` | 和 OSS 之间的一切：`push --follow` 是自动上传，`status` 看还有什么没传 | 不会 |
+| `scripts/oss.sh` | 和 OSS 之间的一切：`push --follow` 是同步（上传判过的录制，每分钟拉团队的任务和计划，常驻服务 `host/xpisode-sync.service` 跑的就是它），`status` 看还有什么没传 | 不会 |
 
 ## 在 Mac 上同时改几个仓库
 

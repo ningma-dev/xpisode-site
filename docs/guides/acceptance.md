@@ -37,12 +37,17 @@ cd ~/xpisode-site && scripts/serve.sh
 
 每一项的结果都记进 `robots/<站点>/LOG.md`。
 
-## 打开自动上传
+## 打开同步
 
-在终端 3 运行：
+同步做两件事：把判过的录制传到 OSS；每分钟从 OSS 拉一次团队的任务、计划、人名和判断（在服务器或飞书上建的计划，一两分钟后出现在这台的面板上）。别的机器人的录制不会拉下来。
+
+把它装成这台电脑的常驻服务，开机就运行，出错自动重启：
 
 ```bash
-cd ~/xpisode-site && scripts/oss.sh push --follow
+cd ~/xpisode-site
+mkdir -p ~/.config/systemd/user && cp host/xpisode-sync.service ~/.config/systemd/user/
+systemctl --user daemon-reload && systemctl --user enable --now xpisode-sync
+sudo loginctl enable-linger "$USER"   # 只做一次：没人登录时也运行
 ```
 
-它会一直运行，把判过的录制传到 OSS。要让它常开，就放在 `tmux` 里。
+看它在做什么：`journalctl --user -u xpisode-sync -f`；还有什么没传：`scripts/oss.sh status`。

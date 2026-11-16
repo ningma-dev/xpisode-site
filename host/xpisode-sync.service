@@ -1,0 +1,11 @@
+[Unit]
+Description=xpisode sync: push recordings as they are judged, pull the team's tasks and plans every minute
+After=network-online.target
+
+[Service]
+ExecStart=%h/xpisode-site/scripts/oss.sh push --follow
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=default.target
