@@ -28,3 +28,9 @@
 ## 2026-11-13 · Claude · 修正相机序列号
 - 站点启动时三台相机都报 `No device connected`：站点文件里填的是 USB 序列号，librealsense 要的是相机自己的序列号（标签上那个）
 - 用 host/camera_serials.py 读出对应关系，改了 station.toml；体检加了 `cameras` 一项，以后这种错会直接查出来
+
+## 2026-11-16 · Claude · 装上 ABC GELLO（左主臂）
+- 版本：本仓库 1e8ae53，新增 xpisode-abc-gello 19f91e3（及 dynamixel-sdk 4.1.0、pyserial）；其余版本不变，没跑 build_pinned.sh
+- GELLO 1L：U2D2 FTBPFNFF，舵机 ID 10–16，2 Mbaud；站点文件 `station_gello.toml`（`station.toml` 不变）
+- 结果：体检 0 FAIL；`python -m xpisode_abc_gello.check`（舵机不上力矩）7 个舵机在线，总线 400 Hz，0 次重试，开机标定通过
+- 还没做：起站点联调（手臂会动，需现场）
