@@ -693,8 +693,8 @@ dependencies = [
 
 [[package]]
 name = "xpisode-abc-gello"
-version = "0.1.0"
-source = { git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git?rev=1cf33ccc75888b5d3473b1cdf2cf525a83e2a193#1cf33ccc75888b5d3473b1cdf2cf525a83e2a193" }
+version = "0.2.0"
+source = { git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git?rev=2d7f4977fb2d1ce09b30f6368a5311a7d2436a81#2d7f4977fb2d1ce09b30f6368a5311a7d2436a81" }
 dependencies = [
     { name = "dynamixel-sdk", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "numpy", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
@@ -795,7 +795,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "xpisode", git = "ssh://git@github.com/ningma-dev/xpisode.git?rev=01d6d596408702c1feea81860ca3432d3263adc2" },
-    { name = "xpisode-abc-gello", git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git?rev=1cf33ccc75888b5d3473b1cdf2cf525a83e2a193" },
+    { name = "xpisode-abc-gello", git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git?rev=2d7f4977fb2d1ce09b30f6368a5311a7d2436a81" },
     { name = "xpisode-device", git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-device&rev=01d6d596408702c1feea81860ca3432d3263adc2" },
     { name = "xpisode-env", git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-env&rev=01d6d596408702c1feea81860ca3432d3263adc2" },
     { name = "xpisode-format", git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-format&rev=01d6d596408702c1feea81860ca3432d3263adc2" },

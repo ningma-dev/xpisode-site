@@ -12,7 +12,7 @@
 robots/<站点>/
   station.toml   这台机器人有哪些设备、怎么录
   can.toml       每条手臂用的 CAN 适配器序列号
-  tuned/         每条跟随臂的调参结果
+  tuned/         每条跟随臂的调参结果，每台 GELLO 主臂的标定
   machine.md     装机时的硬件快照，以后拿来对比
   LOG.md         在这台电脑上做过的事
 ```

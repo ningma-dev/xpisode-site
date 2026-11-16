@@ -1,3 +1,4 @@
-# yam_3 的调参
+# yam_3 的调参和标定
 
-还没测。这台的两条跟随臂测好以后，`can_follower_l.json`、`can_follower_r.json` 放在这里（robots/README.md）。在那之前跟随臂打不开。
+- `can_follower_l.json`、`can_follower_r.json`：两条跟随臂的调参（[给手臂调参](../../../docs/guides/tune-arm.md)）。没有它们，跟随臂打不开。
+- `gello_leader_l.json`：左边 GELLO 主臂的标定，`station_gello.toml` 里的 `leader_l` 读它（[装一台 GELLO 主臂](../../../docs/guides/gello.md)）。拆过舵盘、换过舵机后要重新标定。

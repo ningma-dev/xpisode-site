@@ -46,3 +46,10 @@
 - 原因：GELLO 版站点上"只有几个关节能用"。关节方向沿用了 abc 的默认值，没按这台实测；YAM 第 2、3 关节只能往一个方向转，方向一反，跟随臂就停在限位上
 - 结果：体检 0 FAIL，`gello` 是 TODO（还没标定）；`scripts/gello.sh leader_l ids scan --file station_gello.toml` 7 个舵机都在（ID 10–16，2 Mbaud）
 - 还没做：标定（docs/guides/gello.md 第 2 步，操作员做），之后再起 GELLO 版站点
+
+## 2026-11-16 · ningma（现场）+ Claude · GELLO 标定和试用（docs/guides/gello.md 第 2 步）
+- 版本：本仓库 f740a98，xpisode-abc-gello 1cf33cc
+- 标定：`tuned/gello_leader_l.json`（12:06）。实测关节方向 `1, 1, 1, -1, 1, 1`；abc 的默认值是 `1, -1, -1, -1, 1, 1`，第 2、3 关节相反，这就是之前"只有几个关节能用"的原因。扳机方向也和 abc 那台相反
+- 结果：GELLO 版站点遥操作正常，所有关节都跟手
+- 中途：头顶相机 11:20 在 USB 上掉线，之后每次启动都报 `VIDIOC_S_FMT ... Input/output error`，现场处理后站点跑通。这台的左腕、右腕相机今天也各出过启动错误（`Couldn't resolve requests`、5 秒无画面），相机连接还要查
+- 和文档不一样的地方：无

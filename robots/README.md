@@ -6,7 +6,7 @@
 | --- | --- | --- | --- |
 | `yam_1` | `ubuntu1` | ningma | 相机已登记；CAN 适配器还没插；没调参 |
 | `yam_2` | `ubuntu2` | ningma | 设备已登记；CAN 对手臂、相机对位置还没做；没调参 |
-| `yam_3` | `ubuntu3` | ningma | 设备已登记；CAN 对手臂、相机对位置还没做；没调参 |
+| `yam_3` | `ubuntu3` | ningma | 设备已对上；两条跟随臂已调参；左主臂可换成 GELLO（`station_gello.toml`，已标定）；相机时有掉线 |
 | `tron2_1` | 待定 | 同事 | 还没接入 |
 
 - `_shared/`：所有 YAM 共用的遥操作配置。
