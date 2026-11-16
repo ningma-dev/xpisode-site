@@ -34,3 +34,9 @@
 - GELLO 1L：U2D2 FTBPFNFF，舵机 ID 10–16，2 Mbaud；站点文件 `station_gello.toml`（`station.toml` 不变）
 - 结果：体检 0 FAIL；`python -m xpisode_abc_gello.check`（舵机不上力矩）7 个舵机在线，总线 400 Hz，0 次重试，开机标定通过
 - 还没做：起站点联调（手臂会动，需现场）
+
+## 2026-11-16 · Claude · 更新到统一入口的版本（docs/guides/update.md 第 2 步）
+- 版本：本仓库 fb77da7；依赖没变，没跑 uv sync 和 build_pinned.sh
+- 变化：启动、面板、OSS、调参、存姿态、相机对照各只有一个 `scripts/*.sh`；`upload.sh` 换成 `scripts/oss.sh push --follow`；GELLO 版用 `scripts/run.sh --file station_gello.toml`
+- 结果：体检 0 FAIL（两个站点文件都 PASS）；`scripts/oss.sh status --here` 正常
+- 和文档不一样的地方：无
