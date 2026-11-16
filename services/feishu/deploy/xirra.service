@@ -1,0 +1,14 @@
+[Unit]
+Description=xirra: the team's Feishu assistant over the central xpisode store
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=xirra
+WorkingDirectory=/opt/xpisode-site/services/feishu
+ExecStart=/opt/xpisode-site/services/feishu/.venv/bin/xirra bot
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

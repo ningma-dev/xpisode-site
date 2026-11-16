@@ -9,6 +9,7 @@
 | 开始采集前确认机器人工作正常 | [真机验收](guides/acceptance.md) |
 | 把机器更新到新版本，或者回退 | [更新和回退](guides/update.md) |
 | 接入一种新机器人 | [接入一种新机器人](guides/new-robot-type.md) |
+| 在中心服务器上跑只读面板、中心数据目录和飞书机器人 | [在中心服务器上跑团队服务](guides/central-server.md) |
 | 弄明白本仓库为什么这么放 | [本仓库是怎么组织的](how-it-works.md) |
 
 xpisode 本身怎么用、为什么这样设计，看 xpisode 仓库的 `docs/` 和 `design/`。
