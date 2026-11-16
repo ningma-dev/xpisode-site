@@ -18,6 +18,9 @@ Run it through scripts/oss.sh, on any machine (it needs this repo's .venv):
                                                       newest first, and evict when under
                                                       100 GB are free
     scripts/oss.sh pull                               bring down the small things OSS has
+    scripts/oss.sh pull --link [--mount M]            all small things, and every recording
+                                                      linked to the bucket mount, not copied:
+                                                      a central host's writable data root
     scripts/oss.sh pull --records                     only the records (tasks, plans, people,
                                                       judgments, runs), as push --follow does
                                                       every minute
@@ -1446,6 +1449,31 @@ def remote_state(root: Path, remote: str, *, config: Path | None = None) -> Remo
     return Remote(sizes, index.record_of(), thumbnails, index)
 
 
+def link_recordings(root: Path, mount: Path) -> int:
+    """Link every recording whose sidecar is here to its file on the read-only ``mount``
+    (a central host over the bucket mount: the records local and writable, the recordings
+    read where they are). Linked files count as pushed. Returns how many were linked."""
+    if root.resolve() == mount.resolve() or mount.resolve() in root.resolve().parents:
+        raise SystemExit(f"--root {root} is under the read-only mount {mount}")
+    store = root / "store"
+    ledger = Ledger(root)
+    marks: list[tuple[str, int]] = []
+    for sidecar in sorted(store.glob("episodes/*/*/*.json")):
+        recording = sidecar.with_suffix(".mcap")
+        if recording.is_symlink() or recording.exists():
+            continue
+        key = recording.relative_to(store).as_posix()
+        target = mount / "store" / key
+        if not readable(target):
+            continue
+        os.symlink(target, recording)
+        marks.append((key, target.stat().st_size))
+    ledger.mark(marks, "pushed")
+    if marks:
+        print(f"linked {len(marks)} recordings to {mount}", flush=True)
+    return len(marks)
+
+
 def pull(
     root: Path, remote: str, *, config: Path | None = None, episodes: bool = True
 ) -> list[str]:
@@ -2080,7 +2108,12 @@ def main(argv: list[str] | None = None) -> None:
         help="only records (tasks, plans, people, judgments, runs): not the sidecars and "
         "thumbnails of Episodes recorded elsewhere; what a station pulls",
     )
-    q.add_argument("--link", action="store_true", help="link big files to --mount, not copy")
+    q.add_argument(
+        "--link",
+        action="store_true",
+        help="link big files to --mount, not copy; without --dataset or --run: every "
+        "recording (a central host over the bucket mount)",
+    )
     q.add_argument("--mount", type=Path, default=MOUNT, help=f"read-only data root ({MOUNT})")
     d = commands.add_parser("delete")
     d.add_argument("episode_id")
@@ -2112,9 +2145,11 @@ def main(argv: list[str] | None = None) -> None:
     elif args.command == "pull":
         target = args.dataset or args.run
         if target is None:
-            if args.link:
-                raise SystemExit("--link goes with --dataset or --run")
+            if args.link and args.records:
+                raise SystemExit("--link links recordings: not with --records")
             pull(root, remote, episodes=not args.records)
+            if args.link:
+                link_recordings(root, args.mount)
         else:
             if args.with_episodes and args.run is None:
                 raise SystemExit("--with-episodes goes with --run")
