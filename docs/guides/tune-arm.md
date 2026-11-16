@@ -17,12 +17,12 @@
 
 ## 步骤
 
-命令都在 `~/xpisode-site` 里运行。下面以左跟随臂为例；右臂把 `follower_l` 换成 `follower_r`。
+命令都在 `~/xpisode-site` 里运行。下面以左跟随臂为例；右臂把 `follower_l` 换成 `follower_r`。结果自动存到本站点的 `tuned/` 里，站点文件就从那里读。
 
 1. 先看它打算怎么动。这一步手臂不动：
 
    ```bash
-   .venv/bin/python -m xpisode_i2rt.tune can_follower_l --plan
+   scripts/tune.sh follower_l --plan
    ```
 
    **成功的样子：** 打印出要走的动作，手臂不动。
@@ -30,8 +30,7 @@
 2. 开始调参：
 
    ```bash
-   .venv/bin/python -m xpisode_i2rt.tune can_follower_l --i-am-at-the-arm \
-     --out robots/<站点>/tuned/can_follower_l.json
+   scripts/tune.sh follower_l --i-am-at-the-arm
    ```
 
    **成功的样子：** 生成了 `robots/<站点>/tuned/can_follower_l.json`。

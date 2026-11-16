@@ -138,9 +138,7 @@ command = ["../../.venv/bin/python", "-m", "xpisode_env.teleop", "--station", "{
 
 # Open-loop control: to a pose saved in poses.toml, or along a clip of an
 # Episode, as its `target` prompt says; then it holds the arms there until button 0 switches
-# them. Save a pose
-# (or edit poses.toml) with
-#   .venv/bin/python -m xpisode_env.move --station yam_1 --name save --group left --group right --save ready
+# them. Save a pose where the arms are with scripts/save_pose.sh NAME, the station running.
 [[clients]]
 name = "move"
 command = ["../../.venv/bin/python", "-m", "xpisode_env.move", "--station", "{station}", "--name", "{name}", "--group", "left", "--group", "right"]

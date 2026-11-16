@@ -32,7 +32,7 @@ robots/<站点>/
 
 ## 脚本
 
-每件事只有一个脚本，在机器人电脑上只用下表里的。不要直接运行 `.venv/bin/xpisode` 或 `scripts/oss.py`：那样不读 `.station`，后台任务也不避开相机用的核。
+每件事只有一个脚本，在机器人电脑上只用下表里的。不要直接运行 `.venv/bin/xpisode`、`scripts/oss.py` 或底下的 Python 工具：那样不读 `.station`，要手抄站点名、序列号这些站点文件里已有的东西，后台任务也不避开相机用的核。
 
 | 脚本 | 做什么 | 会改系统吗 |
 | --- | --- | --- |
@@ -41,6 +41,9 @@ robots/<站点>/
 | `host/doctor.sh`、`host/snapshot.sh`、`host/devices.sh` | 体检、快照、列出设备 | 不会，也不让相机开始拍摄 |
 | `scripts/run.sh` | 启动站点；`--file` 选本站点目录里的另一个站点文件 | 手臂会动，要有人在场 |
 | `scripts/serve.sh` | 网页面板 | 不会 |
+| `scripts/tune.sh` | 给一条跟随臂调参，结果存到本站点的 `tuned/` | 手臂会动，要有人在场 |
+| `scripts/save_pose.sh` | 把手臂现在的位置存成预设姿态（站点要在运行） | 不会 |
+| `scripts/camera_baseline.sh` | 相机丢帧对照组（`tools/camera/`） | 会打开相机，要约好时间 |
 | `scripts/oss.sh` | 和 OSS 之间的一切：`push --follow` 是自动上传，`status` 看还有什么没传 | 不会 |
 
 ## 在 Mac 上同时改几个仓库
