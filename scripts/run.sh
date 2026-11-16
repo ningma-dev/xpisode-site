@@ -25,5 +25,6 @@ if [[ "$(dirname -- "$file")" != "$XPISODE_STATION_DIR" || ! -f "$file" ]]; then
   echo "run.sh: no station file $file (--file names a file in $XPISODE_STATION_DIR)" >&2
   exit 1
 fi
+export XPISODE_STATION_FILE="$file"  # what the station's clients (announcer) read
 cd "$here"
 exec "$here/.venv/bin/xpisode" run "$file" ${args[@]+"${args[@]}"}

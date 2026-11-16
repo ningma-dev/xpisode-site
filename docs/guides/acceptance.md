@@ -31,9 +31,9 @@ cd ~/xpisode-site && scripts/serve.sh
 | 三台相机连续跑 10 分钟 | 面板的设备诊断里重置次数为 0，几乎没有丢帧 |
 | 录制中拔掉一台相机 | 1 秒内停止录制，原因里写明是哪台相机 |
 | 录制时，后台在生成代理视频（面板回看用的小视频） | 控制节拍的抖动和不生成时一样 |
-| 杀掉一条手臂的设备进程：`pkill -f 'name follower_l'` | 控制权被收回，录制停止 |
-| 手臂静止时让站点崩溃：`pkill -9 -f 'xpisode run'` | 手臂停稳；重新启动站点后，没录完的那条标为"中断" |
-| 录一条，在面板上判为"要"，然后打开上传（见下） | 10 分钟内，`.venv/bin/python scripts/oss.py status` 显示它已上传 |
+| 杀掉一条手臂的设备进程：用 `pgrep -af 'name follower_l'` 找到它的进程号，再 `kill <进程号>` | 控制权被收回，录制停止 |
+| 手臂静止时让站点崩溃：用 `pgrep -af 'xpisode run'` 找到站点的进程号，再 `kill -9 <进程号>` | 手臂停稳；重新启动站点后，没录完的那条标为"中断" |
+| 录一条，在面板上判为"要"，然后打开上传（见下） | 10 分钟内，`scripts/oss.sh status` 显示它已上传 |
 
 每一项的结果都记进 `robots/<站点>/LOG.md`。
 
@@ -42,7 +42,7 @@ cd ~/xpisode-site && scripts/serve.sh
 在终端 3 运行：
 
 ```bash
-cd ~/xpisode-site && scripts/upload.sh
+cd ~/xpisode-site && scripts/oss.sh push --follow
 ```
 
 它会一直运行，把判过的录制传到 OSS。要让它常开，就放在 `tmux` 里。

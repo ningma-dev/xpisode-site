@@ -3,7 +3,7 @@
 # opens no camera, sends nothing on a CAN bus. Run it as the station user (not root), in the
 # terminal the station will run from (the limits are those of this session).
 #
-#     host/doctor.sh [STATION]          exit status: the number of FAIL lines
+#     host/doctor.sh          exit status: the number of FAIL lines; the station is .station's
 #
 # Items: tools, rtprio, memlock, groups, udev-rules, can-rule, can-links, usbfs, autosuspend,
 # data-root, background-cpus, venv, rtcore, panel, station-file, cameras, tuned.
@@ -12,7 +12,7 @@
 set -uo pipefail
 site="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 host="$site/host"
-XPISODE_STATION="${1:-${XPISODE_STATION:-}}"
+if [[ $# -gt 0 ]]; then echo "doctor.sh takes no arguments (the station comes from .station)" >&2; exit 2; fi
 # shellcheck source=../scripts/station_env.sh
 source "$site/scripts/station_env.sh" || exit 1
 # shellcheck source=usb_lib.sh
@@ -136,10 +136,15 @@ else
 fi
 
 # the station file and the tuning
-name="$(python3 -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb"))["station"])' "$dir/station.toml")"
-if [[ "$name" != "$XPISODE_STATION" ]]; then fail station-file "station = \"$name\", directory robots/$XPISODE_STATION"
-elif grep -q 'FILL_' "$dir/station.toml"; then todo station-file "camera serials still FILL (camera roles)"
-else pass station-file "robots/$XPISODE_STATION/station.toml"; fi
+# every station file here: station.toml and its variants (scripts/run.sh --file)
+for file in "$dir"/*.toml; do
+  name="$(python3 -c 'import sys, tomllib; print(tomllib.load(open(sys.argv[1], "rb")).get("station", ""))' "$file")"
+  [[ -z "$name" ]] && continue  # not a station file (can.toml)
+  label="robots/$XPISODE_STATION/$(basename "$file")"
+  if [[ "$name" != "$XPISODE_STATION" ]]; then fail station-file "$label: station = \"$name\", directory robots/$XPISODE_STATION"
+  elif grep -q 'FILL_' "$file"; then todo station-file "$label: camera serials still FILL (camera roles)"
+  else pass station-file "$label"; fi
+done
 # every camera the station file names is plugged in, under the serial librealsense reports
 wanted="$(grep -o '"serial": "[^"]*"' "$dir/station.toml" | cut -d'"' -f4 | grep -v '^FILL' | sort -u)"
 if [[ -z "$wanted" ]]; then todo cameras "no camera serials in the station file yet"

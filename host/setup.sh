@@ -6,9 +6,9 @@
 # triggered at once (the adapters get their names and come up at 1 Mbit/s); the other udev rules
 # apply when a device is plugged in again, or after a reboot.
 #
-#     sudo host/setup.sh [STATION]
+#     sudo host/setup.sh
 #
-# STATION: robots/<STATION>/ (default: the name in the repo's .station file).
+# The station is the one in the repo's .station file (scripts/station_env.sh).
 # It installs:
 #   - real-time limits for the user (rtprio 90, memlock unlimited): xpisode-i2rt's own
 #     scripts/setup_host.sh at the pinned rev, fetched as the user into local/build/xpisode-i2rt
@@ -24,25 +24,22 @@ set -euo pipefail
 site="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 host="$site/host"
 
-station=""
 for arg in "$@"; do
   case "$arg" in
     -h | --help) sed -n '2,21p' "$0"; exit 0 ;;
-    -*) echo "unknown option $arg" >&2; exit 2 ;;
-    *) station="$arg" ;;
+    *) echo "unknown argument $arg (the station comes from .station)" >&2; exit 2 ;;
   esac
 done
 user="${SUDO_USER:-}"
 if [[ $EUID -ne 0 || -z "$user" || "$user" == root ]]; then
-  echo "usage: sudo $0 [STATION]   (from the station user's account)" >&2
+  echo "usage: sudo $0   (from the station user's account)" >&2
   exit 2
 fi
 
-XPISODE_STATION="$station"
 # shellcheck source=../scripts/station_env.sh
 source "$site/scripts/station_env.sh"
 if [[ -z "$XPISODE_STATION" ]]; then
-  echo "no station: write its name into .station (echo <station> > .station), or give it: sudo $0 <station>" >&2
+  echo "no station: write its name into .station (echo <station> > .station)" >&2
   exit 2
 fi
 echo "station $XPISODE_STATION, user $user"

@@ -18,7 +18,7 @@ robots/<站点>/
 ```
 
 - 只有一个 `main` 分支。每台电脑都拉同一份，各自读自己的目录。
-- 每台电脑在仓库里有一个不提交的 `.station` 文件，写着自己是哪个站点。
+- 每台电脑在仓库里有一个不提交的 `.station` 文件，写着自己是哪个站点。脚本只从这里知道站点，没有参数或环境变量能改它。
 - `robots/_template/` 是新建站点用的模板。
 - 目录名就是站点名，每条录制都会记下它，定下来就不改。
 
@@ -32,13 +32,16 @@ robots/<站点>/
 
 ## 脚本
 
+每件事只有一个脚本，在机器人电脑上只用下表里的。不要直接运行 `.venv/bin/xpisode` 或 `scripts/oss.py`：那样不读 `.station`，后台任务也不避开相机用的核。
+
 | 脚本 | 做什么 | 会改系统吗 |
 | --- | --- | --- |
 | `host/setup.sh` | 系统设置 | 会，要 sudo |
 | `host/can_rules.py` | 生成 CAN 命名规则 | 加 `--check` 只预览；不加要 sudo |
 | `host/doctor.sh`、`host/snapshot.sh`、`host/devices.sh` | 体检、快照、列出设备 | 不会，也不让相机开始拍摄 |
-| `scripts/run.sh` | 启动站点，唯一入口；`--file` 选本站点目录里的另一个站点文件 | 手臂会动，要有人在场 |
-| `scripts/serve.sh`、`scripts/upload.sh` | 网页面板、自动上传 | 不会 |
+| `scripts/run.sh` | 启动站点；`--file` 选本站点目录里的另一个站点文件 | 手臂会动，要有人在场 |
+| `scripts/serve.sh` | 网页面板 | 不会 |
+| `scripts/oss.sh` | 和 OSS 之间的一切：`push --follow` 是自动上传，`status` 看还有什么没传 | 不会 |
 
 ## 在 Mac 上同时改几个仓库
 

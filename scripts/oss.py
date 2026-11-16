@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
 """Sync the data root's store with the central OSS, and free local disk of what OSS holds.
 
-Run it with the workspace's Python (it needs xpisode-format):
+Run it through scripts/oss.sh, on any machine (it needs this repo's .venv):
 
-    .venv/bin/python scripts/oss.py status            what is not on OSS yet, what waits,
+    scripts/oss.sh status                             what is not on OSS yet, what waits,
                                                       how long the disk and the backlog last,
                                                       and what OSS holds (by its index)
-    .venv/bin/python scripts/oss.py push              upload what may go up and OSS lacks,
+    scripts/oss.sh push                               upload what may go up and OSS lacks,
                                                       newest Episodes first
-    .venv/bin/python scripts/oss.py push --dataset ID a dataset first: its members, their
+    scripts/oss.sh push --dataset ID                  a dataset first: its members, their
                                                       judgments and plans, then its record;
                                                       then stop (with --follow: go on)
-    .venv/bin/python scripts/oss.py push --run ID     one run (an export, a training run), the
+    scripts/oss.sh push --run ID                      one run (an export, a training run), the
                                                       run files it read and their records, no
                                                       recordings; then stop
-    .venv/bin/python scripts/oss.py push --follow     keep pushing as the panel sees writes,
+    scripts/oss.sh push --follow                      keep pushing as the panel sees writes,
                                                       newest first, and evict when under
                                                       100 GB are free
-    .venv/bin/python scripts/oss.py pull              bring down the small things OSS has
-    .venv/bin/python scripts/oss.py pull --dataset ID [--link --mount /mnt/data_oss/xpisode_data]
+    scripts/oss.sh pull                               bring down the small things OSS has
+    scripts/oss.sh pull --dataset ID [--link --mount /mnt/data_oss/xpisode_data]
                                                       and the recordings a dataset needs
-    .venv/bin/python scripts/oss.py pull --run ID     a run's files (a checkpoint) and the
+    scripts/oss.sh pull --run ID                      a run's files (a checkpoint) and the
                                                       run files it read; --with-episodes too
                                                       the recordings it read
-    .venv/bin/python scripts/oss.py delete ID --reason TEXT --admin-config PATH
+    scripts/oss.sh delete ID --reason TEXT --admin-config PATH
                                                       delete an uploaded Episode everywhere
-    .venv/bin/python scripts/oss.py evict [--days 7] [--free-gb N] [--yes]
+    scripts/oss.sh evict [--days 7] [--free-gb N] [--yes]
                                                       delete recordings here that OSS holds
 
 One topology (design 7.6): every machine talks only to the central OSS. Small things

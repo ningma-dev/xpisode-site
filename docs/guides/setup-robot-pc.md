@@ -144,7 +144,7 @@ mkdir -p ~/xpisode-data
 3. 检查：
 
    ```bash
-   .venv/bin/python scripts/oss.py status
+   scripts/oss.sh status
    ```
 
 **成功的样子：** 显示 OSS 上已有多少条录制；`host/doctor.sh` 里 `tools` 是 PASS。
@@ -182,7 +182,7 @@ git push
 
 ## 重装时有什么不同
 
-- **重装前**：运行 `.venv/bin/python scripts/oss.py status`，确认"没上传的"是 0。本机没推送的提交先推送。
+- **重装前**：运行 `scripts/oss.sh status`，确认"没上传的"是 0。本机没推送的提交先推送。
 - **第 4 步**：只写 `.station`。
 - **第 7 步**：设备和线都没动过的话，只运行 `host/doctor.sh`，确认 `can-links`、`cameras` 是 PASS。
 - **第 11 步**：先运行 `git diff robots/<站点>/machine.md`，看硬件有没有变化。
