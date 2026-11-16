@@ -134,8 +134,11 @@ PROPOSE_TOOLS: list[dict[str, Any]] = [
 ]
 
 
-HISTORY_S = 30 * 60
-HISTORY_TURNS = 6
+HISTORY_S = 24 * 3600
+"""A chat's conversation is forgotten after a day without a word."""
+THREAD_S = 7 * 24 * 3600
+"""A reply thread is one topic: kept a week."""
+HISTORY_TURNS = 10
 
 
 def _date_ns(text: str, end: bool = False) -> int:
@@ -151,8 +154,16 @@ class Asker:
         self.model = model
         self.log = log
         self.hide = hide
-        self.history: dict[str, tuple[float, list[dict[str, Any]]]] = {}
-        """Per conversation (a chat and a person): the recent turns, as plain question and answer."""
+        self.history_path = log.with_name("history.json")
+        self.history: dict[str, tuple[float, list[dict[str, Any]]]] = (
+            {k: (v[0], v[1]) for k, v in json.loads(self.history_path.read_text()).items()}
+            if self.history_path.exists()
+            else {}
+        )
+        """Per conversation (a reply thread, else a chat and a person): the recent turns, as plain
+        question and answer, kept on disk so a restart forgets nothing."""
+        notes = Path(__file__).resolve().parents[2] / "team.md"
+        self.notes = notes.read_text() if notes.exists() else ""
         self.tools: dict[str, Callable[..., Any]] = {
             "search_episodes": self._search,
             "list_plans": self._plans,
@@ -268,11 +279,11 @@ class Asker:
             "propose_dataset": lambda **a: propose("dataset", **a),
         }
         at, before = self.history.get(session, (0.0, []))
-        if time.monotonic() - at > HISTORY_S:
+        if time.time() - at > (THREAD_S if session.startswith("thread:") else HISTORY_S):
             before = []
         asked = {"role": "user", "content": (f"（提问人：{who}）" if who else "") + question}
         messages: list[dict[str, Any]] = [
-            {"role": "system", "content": SYSTEM.format(today=stats.today().isoformat())},
+            {"role": "system", "content": SYSTEM.format(today=stats.today().isoformat()) + ("\n\n团队知识：\n" + self.notes if self.notes else "")},
             *before,
             asked,
         ]
@@ -284,7 +295,8 @@ class Asker:
                 self._log(question, who, answer)
                 if session:
                     kept = [*before, asked, {"role": "assistant", "content": answer}][-HISTORY_TURNS * 2 :]
-                    self.history[session] = (time.monotonic(), kept)
+                    self.history[session] = (time.time(), kept)
+                    self._save_history()
                 return answer, made
             messages.append(msg.model_dump(exclude_none=True))
             for call in msg.tool_calls:
@@ -298,6 +310,17 @@ class Asker:
                     {"role": "tool", "tool_call_id": call.id, "content": json.dumps(result, ensure_ascii=False, default=str)[:30000]}
                 )
         return "这个问题查了太多步还没有结论，换个问法试试。", made
+
+    def forget(self, session: str) -> None:
+        self.history.pop(session, None)
+        self._save_history()
+
+    def _save_history(self) -> None:
+        now = time.time()
+        self.history = {k: v for k, v in self.history.items() if now - v[0] < THREAD_S}
+        tmp = self.history_path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(self.history, ensure_ascii=False))
+        tmp.replace(self.history_path)
 
     def _log(self, question: str, who: str | None, answer: str) -> None:
         with self.log.open("a") as f:

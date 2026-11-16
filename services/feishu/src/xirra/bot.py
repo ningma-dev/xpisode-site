@@ -17,6 +17,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 import lark_oapi as lark
+from lark_oapi.api.application.v6 import P2ApplicationBotMenuV6
 from lark_oapi.api.contact.v3 import GetUserRequest
 from lark_oapi.api.im.v1 import (
     CreateMessageRequest,
@@ -32,7 +33,7 @@ from lark_oapi.event.callback.model.p2_card_action_trigger import (
     P2CardActionTriggerResponse,
 )
 
-from xirra import stats
+from xirra import forms, stats
 from xirra.answers import Answers
 from xirra.config import Config
 
@@ -43,6 +44,7 @@ HELP = """**我能做的**
 - **人 名字**：某人最近 7 天的采集时长，例如「人 jianping_yin」
 - **任务**：所有任务；**任务 名字**：某个任务的中文说明和给模型的指令
 - **日报**：现在就发一份日报
+- **建计划** / **建数据集**：发一张表单，选好点「起草」
 - 其他问题直接问，例如「测温棒录了多少条要的？」「SMT 那个数据集是谁建的？」
 - 也可以让我建东西，例如「在 yam_2 上建一个测温棒的采集计划，100 条」「用 yam_1 判为要的叠碗建一个数据集」「结束 stack_bowls_yam_1_20261114 这个计划」。我会先发一张卡片给你看，你点「确认」才会写入
 
@@ -158,6 +160,10 @@ class Bot:
         pid, do = value.get("proposal"), value.get("do")
         open_id = event.operator.open_id if event and event.operator else ""
         message_id = event.context.open_message_id if event and event.context else ""
+        if value.get("form") and self.proposals is not None:
+            fields = (event.action.form_value or {}) if event and event.action else {}
+            self.pool.submit(self._form, value["form"], fields, open_id, message_id)
+            return P2CardActionTriggerResponse({"toast": {"type": "info", "content": "起草中…"}})
         if not pid or self.proposals is None:
             return P2CardActionTriggerResponse({"toast": {"type": "info", "content": "这张卡片已失效"}})
         self.pool.submit(self._act, pid, do, open_id, message_id)
@@ -172,6 +178,64 @@ class Bot:
         except Exception as error:  # noqa: BLE001 - show it on the card
             traceback.print_exc()
             self.patch(message_id, json.dumps(card_body(str(error), "没有执行", None, "red"), ensure_ascii=False))
+
+    def _form(self, kind: str, fields: dict[str, Any], open_id: str, message_id: str) -> None:
+        who = self.person(open_id)
+        try:
+            if who is None:
+                raise PermissionError("你还没对应到人员名单，不能建东西。请负责人先对应。")
+            if kind == "plan":
+                count = int(str(fields.get("count", "")).strip())
+                p = self.proposals.plan(who, open_id, fields["task"], fields["station"], count)
+            else:
+                filters = {"task": fields["task"], "station": fields.get("station") or None}
+                if fields.get("failures", "去掉") == "去掉":
+                    filters["failed"] = "false"
+                val = float(str(fields.get("val") or "0.1"))
+                station = fields.get("station") or "all"
+                name = (fields.get("name") or "").strip() or f"{fields['task']}_{station}_{stats.today():%Y%m%d}"
+                parts = {"train": round(1 - val, 6), "val": val} if val > 0 else {"train": 1.0}
+                p = self.proposals.dataset(who, open_id, name, filters, parts)
+            self.patch(message_id, proposal_card(p))
+        except Exception as error:  # noqa: BLE001 - show it on the card
+            self.patch(message_id, json.dumps(card_body(f"{error}\n\n重新发「建计划」或「建数据集」再试。", "没有起草", None, "red"), ensure_ascii=False))
+
+    def form_card(self, kind: str) -> str:
+        tasks = sorted({t["task"]["name"] for t in self.answers.panel.tasks() if not t["task"].get("archived")})
+        stations = sorted(s for s in self.proposals._stations() if s not in self.answers.hide)
+        return forms.plan_form(tasks, stations) if kind == "plan" else forms.dataset_form(tasks, stations)
+
+    # the menu
+
+    def on_menu(self, data: P2ApplicationBotMenuV6) -> None:
+        event = data.event
+        key = event.event_key if event else ""
+        open_id = event.operator.operator_id.open_id if event and event.operator and event.operator.operator_id else ""
+        if open_id:
+            self.pool.submit(self._menu, key, open_id)
+
+    def _menu(self, key: str, open_id: str) -> None:
+        try:
+            who = self.person(open_id)
+            if key in ("plan_form", "dataset_form"):
+                content = self.form_card(key.removesuffix("_form"))
+            else:
+                text = {"progress": "进度", "today": "今天", "yesterday": "昨天", "me": "我", "tasks": "任务", "help": "帮助"}.get(key, "帮助")
+                answer, title, _ = self.answer(text, who, "", open_id)
+                content = card(answer, title)
+            self.send_user(open_id, content)
+        except Exception:  # noqa: BLE001 - keep running
+            traceback.print_exc()
+
+    def send_user(self, open_id: str, content: str) -> None:
+        r = self.client.im.v1.message.create(
+            CreateMessageRequest.builder()
+            .receive_id_type("open_id")
+            .request_body(CreateMessageRequestBody.builder().receive_id(open_id).msg_type("interactive").content(content).build())
+            .build()
+        )
+        if not r.success():
+            print(f"[bot] send to user failed: {r.code} {r.msg}", flush=True)
 
     def send(self, chat_id: str, markdown: str, title: str | None = None) -> bool:
         r = self.client.im.v1.message.create(
@@ -208,7 +272,12 @@ class Bot:
             who = self.person(open_id)
             if who is None:
                 self._remember(open_id)
-            answer, title, made = self.answer(text, who, msg.chat_id, open_id)
+            if text in ("建计划", "建采集计划", "建数据集") and self.proposals is not None:
+                self.reply_raw(msg.message_id, self.form_card("dataset" if "数据集" in text else "plan"))
+                return
+            root = getattr(msg, "root_id", None) or getattr(msg, "parent_id", None)
+            session = f"thread:{root}" if root else f"{msg.chat_id}:{open_id}"
+            answer, title, made = self.answer(text, who, msg.chat_id, open_id, session)
             self.reply(msg.message_id, answer, title)
             for p in made:
                 self.reply_raw(msg.message_id, proposal_card(p))
@@ -223,11 +292,13 @@ class Bot:
             with self.unknown_path.open("a") as f:
                 f.write(line + "\n")
 
-    def answer(self, text: str, who: str | None, chat_id: str, open_id: str = "") -> tuple[str, str | None, list[Any]]:
+    def answer(
+        self, text: str, who: str | None, chat_id: str, open_id: str = "", session: str = ""
+    ) -> tuple[str, str | None, list[Any]]:
         t = text.strip()
         a = self.answers
         if t in ("新话题", "重新开始") and self.asker is not None:
-            self.asker.history.pop(f"{chat_id}:{open_id}", None)
+            self.asker.forget(session or f"{chat_id}:{open_id}")
             return "好，之前的对话不算了。", None, []
         if t in ("", "帮助", "help", "?", "？"):
             return HELP, None, []
@@ -253,7 +324,7 @@ class Bot:
             return f"这个会话的 chat_id：`{chat_id}`", None, []
         if self.asker is None:
             return "自由提问还没开通（没有配置大模型）。\n\n" + HELP, None, []
-        answer, made = self.asker.ask(t, who, open_id, self.proposals, session=f"{chat_id}:{open_id}")
+        answer, made = self.asker.ask(t, who, open_id, self.proposals, session=session or f"{chat_id}:{open_id}")
         return answer, None, made
 
     # the daily report
@@ -287,6 +358,7 @@ class Bot:
             lark.EventDispatcherHandler.builder("", "")
             .register_p2_im_message_receive_v1(self.on_message)
             .register_p2_card_action_trigger(self.on_card)
+            .register_p2_application_bot_menu_v6(self.on_menu)
             .build()
         )
         lark.ws.Client(self.config.app_id, self.config.app_secret, event_handler=handler, log_level=lark.LogLevel.INFO).start()
