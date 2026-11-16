@@ -1,7 +1,7 @@
 # Station yam_3 with the left YAM leader replaced by an ABC GELLO (xpisode-abc-gello); everything
-# else is robots/yam_3/station.toml. Run it instead of that file:
+# else is robots/yam_3/station.toml. Start it instead of that file:
 #
-#     .venv/bin/xpisode run robots/yam_3/station_gello.toml --who NAME
+#     scripts/run.sh --file station_gello.toml --who NAME
 #
 # Differences from station.toml:
 # - leader_l is the GELLO on its U2D2 (FTDI serial FTBPFNFF, motor IDs 10-16 at 2 Mbaud). It must

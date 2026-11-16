@@ -9,7 +9,7 @@
 # Per-machine facts are marked FILL. A FILL serial names no camera, so that device cannot open
 # and the station cannot record (blocking: device) until it is filled in.
 #
-#     scripts/run.sh --who NAME        (or: .venv/bin/xpisode run robots/yam_1/station.toml --who NAME)
+#     scripts/run.sh --who NAME
 #
 # Commands run beside this file (robots/yam_1/); every device and client uses the repo's .venv.
 #
