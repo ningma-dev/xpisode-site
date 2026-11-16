@@ -40,3 +40,9 @@
 - 变化：启动、面板、OSS、调参、存姿态、相机对照各只有一个 `scripts/*.sh`；`upload.sh` 换成 `scripts/oss.sh push --follow`；GELLO 版用 `scripts/run.sh --file station_gello.toml`
 - 结果：体检 0 FAIL（两个站点文件都 PASS）；`scripts/oss.sh status --here` 正常
 - 和文档不一样的地方：无
+
+## 2026-11-16 · Claude · GELLO 改为标定后使用（docs/guides/update.md 第 2、4 步）
+- 版本：本仓库 ef76fe3，xpisode-abc-gello 1cf33cc；其余版本不变，没跑 build_pinned.sh
+- 原因：GELLO 版站点上"只有几个关节能用"。关节方向沿用了 abc 的默认值，没按这台实测；YAM 第 2、3 关节只能往一个方向转，方向一反，跟随臂就停在限位上
+- 结果：体检 0 FAIL，`gello` 是 TODO（还没标定）；`scripts/gello.sh leader_l ids scan --file station_gello.toml` 7 个舵机都在（ID 10–16，2 Mbaud）
+- 还没做：标定（docs/guides/gello.md 第 2 步，操作员做），之后再起 GELLO 版站点
