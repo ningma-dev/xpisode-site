@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import argparse
-import os
 
 from openai import OpenAI
 
 from xirra import config as config_module
+from xirra import team as team_module
 from xirra.answers import Answers
 from xirra.panel import Panel
 
@@ -20,13 +20,15 @@ def build(cfg: config_module.Config) -> tuple[Answers, object | None, object]:
     panel = Panel(cfg.panel_url)
     writer = Writer(cfg.write_panel_url) if cfg.write_panel_url else None
     proposals = Proposals(panel, writer, cfg.state_dir / "proposals.jsonl")
-    hide = {s for s in os.environ.get("HIDE_STATIONS", "yam_abc").split(",") if s}
+    site = team_module.site_dir()
+    hide = team_module.retired(site)
     translate = None
     asker = None
     if cfg.has_llm:
         client = OpenAI(base_url=cfg.llm_base_url, api_key=cfg.llm_api_key, timeout=120)
         translate = Translator(panel, client, cfg.llm_model, cfg.state_dir / "translations.json")
-        asker = Asker(panel, cfg.llm_base_url, cfg.llm_api_key, cfg.llm_model, cfg.state_dir / "questions.jsonl", hide)
+        team = team_module.Team(panel, site, translate)
+        asker = Asker(panel, cfg.llm_base_url, cfg.llm_api_key, cfg.llm_model, cfg.state_dir / "questions.jsonl", hide, team)
     return Answers(panel, hide, translate), asker, proposals
 
 

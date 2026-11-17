@@ -97,3 +97,13 @@ def dataset_form(tasks: list[str], stations: list[str]) -> str:
         ],
         "起草",
     )
+
+
+def whoami_form(names: list[str], feishu_name: str, can_add: bool) -> str:
+    hint = "我还不知道你在人员名单里叫什么。选一下，以后统计和建东西都记在这个名字下。"
+    if feishu_name:
+        hint = f"{feishu_name}，" + hint
+    fields = [_select("name", "我是", names, required=not can_add)]
+    if can_add:
+        fields.append(_input("new", "名单里没有：新名字，小写英文，如 jianping_yin", "", required=False))
+    return _form("whoami", "你是谁", hint, fields, "就是我")

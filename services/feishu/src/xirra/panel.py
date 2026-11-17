@@ -78,3 +78,6 @@ class Writer:
 
     def create_dataset(self, **body: Any) -> Any:
         return self._send("POST", "/api/v1/datasets", body)
+
+    def add_person(self, name: str, by: str) -> Any:
+        return self._send("POST", "/api/v1/people", {"name": name, "by": by})

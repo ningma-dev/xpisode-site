@@ -9,8 +9,9 @@ from __future__ import annotations
 import datetime as dt
 import json
 import time
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from openai import OpenAI
 
@@ -148,8 +149,11 @@ def _date_ns(text: str, end: bool = False) -> int:
 
 
 class Asker:
-    def __init__(self, panel: Panel, base_url: str, api_key: str, model: str, log: Path, hide: set[str]) -> None:
+    def __init__(
+        self, panel: Panel, base_url: str, api_key: str, model: str, log: Path, hide: set[str], team: Any = None
+    ) -> None:
         self.panel = panel
+        self.team = team
         self.client = OpenAI(base_url=base_url, api_key=api_key, timeout=120)
         self.model = model
         self.log = log
@@ -162,8 +166,6 @@ class Asker:
         )
         """Per conversation (a reply thread, else a chat and a person): the recent turns, as plain
         question and answer, kept on disk so a restart forgets nothing."""
-        notes = Path(__file__).resolve().parents[2] / "team.md"
-        self.notes = notes.read_text() if notes.exists() else ""
         self.tools: dict[str, Callable[..., Any]] = {
             "search_episodes": self._search,
             "list_plans": self._plans,
@@ -256,7 +258,7 @@ class Asker:
 
         def propose(kind: str, **args: Any) -> dict[str, Any]:
             if who is None:
-                return {"error": "提问人还没对应到人员名单，不能写入；请负责人先对应"}
+                return {"error": "还不知道提问人是谁，不能写入；让他发「我是谁」选一下"}
             if kind == "task":
                 p = proposals.task(who, open_id, **args)
             elif kind == "plan":
@@ -282,8 +284,14 @@ class Asker:
         if time.time() - at > (THREAD_S if session.startswith("thread:") else HISTORY_S):
             before = []
         asked = {"role": "user", "content": (f"（提问人：{who}）" if who else "") + question}
+        known = ""
+        if self.team is not None:
+            try:
+                known = "\n\n团队现状（从记录里读出，可能几分钟前的）：\n" + self.team.text()
+            except Exception:  # noqa: BLE001 - answer without it
+                known = ""
         messages: list[dict[str, Any]] = [
-            {"role": "system", "content": SYSTEM.format(today=stats.today().isoformat()) + ("\n\n团队知识：\n" + self.notes if self.notes else "")},
+            {"role": "system", "content": SYSTEM.format(today=stats.today().isoformat()) + known},
             *before,
             asked,
         ]

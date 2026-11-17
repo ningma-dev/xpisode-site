@@ -11,7 +11,8 @@ The file (default ~/.config/xirra/env, mode 600) holds KEY=value lines:
     REPORT_AT                             HH:MM, Asia/Shanghai (default 09:00)
     STATE_DIR                             where caches and logs go (default ~/.local/state/xirra)
 
-People: STATE_DIR/people.toml maps a Feishu open_id to the person's xpisode name.
+People: STATE_DIR/people.toml maps a Feishu open_id to the person's xpisode name; people pick
+themselves from a card, so nobody edits it.
 """
 
 from __future__ import annotations

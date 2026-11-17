@@ -44,6 +44,7 @@ HELP = """**我能做的**
 - **人 名字**：某人最近 7 天的采集时长，例如「人 jianping_yin」
 - **任务**：所有任务；**任务 名字**：某个任务的中文说明和给模型的指令
 - **日报**：现在就发一份日报
+- **我是谁**：选你在人员名单里的名字
 - **建计划** / **建数据集**：发一张表单，选好点「起草」
 - 其他问题直接问，例如「测温棒录了多少条要的？」「SMT 那个数据集是谁建的？」
 - 也可以让我建东西，例如「在 yam_2 上建一个测温棒的采集计划，100 条」「用 yam_1 判为要的叠碗建一个数据集」「结束 stack_bowls_yam_1_20261114 这个计划」。我会先发一张卡片给你看，你点「确认」才会写入
@@ -93,17 +94,48 @@ class Bot:
         self.seen: OrderedDict[str, None] = OrderedDict()
         self.names: dict[str, str] = {}
         self.people_path = config.state_dir / "people.toml"
-        self.unknown_path = config.state_dir / "unknown_people.jsonl"
+        self.asked: set[str] = set()
+        """Who was shown the "who are you" card since start; the card comes once, not every message."""
 
     # who
 
+    def people(self) -> dict[str, str]:
+        """Feishu open_id -> xpisode name, as people picked themselves (STATE_DIR/people.toml)."""
+        return {k: str(v) for k, v in tomllib.loads(self.people_path.read_text()).items()} if self.people_path.exists() else {}
+
     def person(self, open_id: str) -> str | None:
-        """The xpisode name a Feishu user maps to, from people.toml (open_id = "name")."""
-        if self.people_path.exists():
-            mapping = tomllib.loads(self.people_path.read_text())
-            if open_id in mapping:
-                return str(mapping[open_id])
-        return None
+        return self.people().get(open_id)
+
+    def whoami_card(self, open_id: str) -> str:
+        names = sorted(p["name"] for p in self.answers.panel.people())
+        can_add = self.proposals is not None and self.proposals.writer is not None
+        return forms.whoami_form(names, self.feishu_name(open_id), can_add)
+
+    def _whoami(self, fields: dict[str, Any], open_id: str, message_id: str) -> None:
+        try:
+            new = str(fields.get("new") or "").strip().lower()
+            name = new or str(fields.get("name") or "").strip()
+            if not name:
+                raise ValueError("选一个名字，或填一个新名字。")
+            names = {p["name"] for p in self.answers.panel.people()}
+            if name not in names:
+                if not re.fullmatch(r"[a-z][a-z0-9_]{1,63}", name):
+                    raise ValueError("新名字用小写英文、数字和下划线，例如 jianping_yin。")
+                if self.proposals is None or self.proposals.writer is None:
+                    raise ValueError("现在还不能往名单里加名字，先选一个已有的。")
+                self.proposals.writer.add_person(name, by=name)
+            mapping = self.people()
+            taken = [k for k, v in mapping.items() if v == name and k != open_id]
+            if taken:
+                raise ValueError(f"{name} 已经对应了别的飞书账号。如果那是你的旧账号，找负责人。")
+            mapping[open_id] = name
+            tmp = self.people_path.with_suffix(".tmp")
+            tmp.write_text("# Feishu open_id = xpisode name; people pick themselves in the bot\n" + "".join(f'"{k}" = "{v}"\n' for k, v in sorted(mapping.items())))
+            tmp.replace(self.people_path)
+            print(f"[bot] {open_id} is {name}", flush=True)
+            self.patch(message_id, json.dumps(card_body(f"好，你是 **{name}**。发「我」看你最近的采集。", "记住了", None, "green"), ensure_ascii=False))
+        except Exception as error:  # noqa: BLE001 - show it on the card
+            self.patch(message_id, json.dumps(card_body(f"{error}\n\n发「我是谁」再试。", "没有记上", None, "red"), ensure_ascii=False))
 
     def feishu_name(self, open_id: str) -> str:
         if open_id not in self.names:
@@ -160,6 +192,10 @@ class Bot:
         pid, do = value.get("proposal"), value.get("do")
         open_id = event.operator.open_id if event and event.operator else ""
         message_id = event.context.open_message_id if event and event.context else ""
+        if value.get("form") == "whoami":
+            fields = (event.action.form_value or {}) if event and event.action else {}
+            self.pool.submit(self._whoami, fields, open_id, message_id)
+            return P2CardActionTriggerResponse({"toast": {"type": "info", "content": "记下了…"}})
         if value.get("form") and self.proposals is not None:
             fields = (event.action.form_value or {}) if event and event.action else {}
             self.pool.submit(self._form, value["form"], fields, open_id, message_id)
@@ -183,7 +219,7 @@ class Bot:
         who = self.person(open_id)
         try:
             if who is None:
-                raise PermissionError("你还没对应到人员名单，不能建东西。请负责人先对应。")
+                raise PermissionError("我还不知道你是谁，不能建东西。发「我是谁」选一下。")
             if kind == "plan":
                 count = int(str(fields.get("count", "")).strip())
                 p = self.proposals.plan(who, open_id, fields["task"], fields["station"], count)
@@ -219,6 +255,8 @@ class Bot:
             who = self.person(open_id)
             if key in ("plan_form", "dataset_form"):
                 content = self.form_card(key.removesuffix("_form"))
+            elif key == "me" and who is None:
+                content = self.whoami_card(open_id)
             else:
                 text = {"progress": "进度", "today": "今天", "yesterday": "昨天", "me": "我", "tasks": "任务", "help": "帮助"}.get(key, "帮助")
                 answer, title, _ = self.answer(text, who, "", open_id)
@@ -270,8 +308,11 @@ class Bot:
             text = json.loads(msg.content).get("text", "")
             text = re.sub(r"@_user_\d+", "", text).strip()
             who = self.person(open_id)
-            if who is None:
-                self._remember(open_id)
+            if text in ("我是谁", "我是") or (who is None and open_id not in self.asked):
+                self.asked.add(open_id)
+                self.reply_raw(msg.message_id, self.whoami_card(open_id))
+                if text in ("我是谁", "我是"):
+                    return
             if text in ("建计划", "建采集计划", "建数据集") and self.proposals is not None:
                 self.reply_raw(msg.message_id, self.form_card("dataset" if "数据集" in text else "plan"))
                 return
@@ -284,13 +325,6 @@ class Bot:
         except Exception:  # noqa: BLE001 - tell the person, keep running
             traceback.print_exc()
             self.reply(msg.message_id, "出错了，没能回答。已经记在日志里。")
-
-    def _remember(self, open_id: str) -> None:
-        line = json.dumps({"open_id": open_id, "feishu_name": self.feishu_name(open_id)}, ensure_ascii=False)
-        known = self.unknown_path.read_text() if self.unknown_path.exists() else ""
-        if open_id not in known:
-            with self.unknown_path.open("a") as f:
-                f.write(line + "\n")
 
     def answer(
         self, text: str, who: str | None, chat_id: str, open_id: str = "", session: str = ""
@@ -310,7 +344,7 @@ class Bot:
             return a.day(stats.today() - dt.timedelta(days=1)), None, []
         if t in ("我", "我的"):
             if who is None:
-                return "我还不知道你在人员名单里叫什么。请让负责人把你的飞书账号对应上。", None, []
+                return "我还不知道你在人员名单里叫什么。发「我是谁」，在卡片里选一下。", None, []
             return a.person(who), None, []
         if m := re.fullmatch(r"人\s+(\S+)", t):
             return a.person(m.group(1)), None, []
