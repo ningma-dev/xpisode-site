@@ -960,7 +960,7 @@ def read_through(root: Path) -> None:
 
 
 def make_sidecars(root: Path) -> None:
-    """Each recording's sidecar and thumbnail, made where missing, so they go up after it
+    """Each recording's sidecar, made where missing, so it goes up after it
     (store.md 4)."""
     from xpisode_format.sidecar import ensure
 
@@ -968,7 +968,7 @@ def make_sidecars(root: Path) -> None:
     for path in sorted((root / "store" / "episodes").glob("*/*/*.mcap")):
         if path.stem in gone or path.is_symlink():
             continue
-        if not path.with_suffix(".json").exists() or not path.with_suffix(".jpg").exists():
+        if not path.with_suffix(".json").exists():
             try:
                 ensure(path)
             except Exception as error:  # noqa: BLE001 - one bad file must not stop the rest
