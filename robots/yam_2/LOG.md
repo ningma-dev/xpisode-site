@@ -22,3 +22,12 @@
 ## 2026-11-13 · Claude · 修正相机序列号
 - 站点启动时三台相机都报 `No device connected`：站点文件里填的是 USB 序列号，librealsense 要的是相机自己的序列号（标签上那个）
 - 用 host/camera_serials.py 读出对应关系，改了 station.toml；体检加了 `cameras` 一项，以后这种错会直接查出来
+
+## 2026-11-17 · Claude（ningma 同意）· 更新版本，打开同步（docs/guides/update.md，acceptance.md「打开同步」）
+- 站点已由操作员停下（最后一条录制 11:59）；停了面板（12:07），更新后用 `scripts/serve.sh` 重新开了面板，站点没有重启
+- 版本：本仓库 5b80309 → 25f7a99；`uv sync --locked`、`scripts/build_pinned.sh` 通过，体检 0 FAIL
+- `host/setup.sh` 这次只改了参数写法，系统设置没变，没有重跑
+- 同步服务 `xpisode-sync` 已装上并在运行：拉下 428 个小记录，开始上传 1036 个文件、287 GB
+- 还没做：`sudo loginctl enable-linger ubuntu`（要 sudo）。在那之前，桌面登录着服务才运行
+- 本机有两个没提交的调参文件 `tuned/can_follower_l.json`、`tuned/can_follower_r.json`
+- 和文档不一样的地方：无

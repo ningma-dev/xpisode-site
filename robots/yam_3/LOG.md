@@ -53,3 +53,9 @@
 - 结果：GELLO 版站点遥操作正常，所有关节都跟手
 - 中途：头顶相机 11:20 在 USB 上掉线，之后每次启动都报 `VIDIOC_S_FMT ... Input/output error`，现场处理后站点跑通。这台的左腕、右腕相机今天也各出过启动错误（`Couldn't resolve requests`、5 秒无画面），相机连接还要查
 - 和文档不一样的地方：无
+
+## 2026-11-17 · Claude（ningma 同意）· 打开同步（docs/guides/acceptance.md「打开同步」）
+- 版本：本仓库 25f7a99（拉取时已是最新），这次没有依赖变化
+- 同步服务 `xpisode-sync` 已装上并在运行：拉下 424 个小记录，传上 25 个小文件
+- 还没做：`sudo loginctl enable-linger ubuntu`（要 sudo）。在那之前，桌面登录着服务才运行
+- 和文档不一样的地方：无
