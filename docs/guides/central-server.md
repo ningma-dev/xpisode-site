@@ -1,6 +1,6 @@
 # 在中心服务器上跑团队服务
 
-在一台能挂载 OSS 的服务器上，跑三样东西：给大家看全部数据的只读面板、中心数据目录（在这里建任务、计划、数据集，再同步到 OSS）、飞书机器人。换服务器或重装时照这篇做。
+在一台能挂载 OSS 的服务器上，跑三样东西：给大家看全部数据的只读面板、中心数据目录（在这里建任务、计划、数据集，再同步到 OSS）、只读的飞书机器人。换服务器或重装时照这篇做。
 
 服务器只需要 CPU，不需要 GPU。和 OSS 在同一个地域，挂载用内网地址。
 
@@ -9,8 +9,8 @@
 | 服务 | 做什么 | 端口 |
 | --- | --- | --- |
 | 只读面板 | 直接读 OSS 挂载，大家通过 ssh 隧道看全部录制、判断、计划；不能改任何东西 | 8090 |
-| 中心数据目录 | 任务、计划、判断、数据集这些小记录放在本地，可以写；录制只链接到挂载上，不复制。每分钟和 OSS 同步一次 | 8091（只给机器人用） |
-| 飞书机器人 | 回答进度、统计、任务；起草任务、计划、数据集，提议人确认后通过中心数据目录写入 | 不占端口，主动连飞书 |
+| 中心数据目录 | 一个能写的面板：在这里建任务、计划、数据集。小记录放在本地，录制只链接到挂载上，不复制。每分钟和 OSS 同步一次 | 8091 |
+| 飞书机器人 | 日报、进度、统计、任务说明，回答问题。只看不改，要写的事让人去面板 | 不占端口，主动连飞书 |
 
 站点那边的同步服务每分钟拉一次团队的任务和计划，所以这里建的计划，一两分钟后出现在站点面板上。
 
@@ -52,15 +52,16 @@ setsid nohup .venv/bin/xpisode serve --read-only /mnt/data_oss/xpisode_data \
 
 ## 4. 开中心数据目录
 
-为什么：机器人写入任务、计划、数据集的地方，写了再推到 OSS。
+为什么：在中心建任务、计划、数据集的地方，写了再推到 OSS，各站点一分钟内拉到。
 
 ```bash
-mkdir -p ~/.local/state/xirra
-XPISODE_VENV=~/xpisode-site/.venv setsid nohup services/feishu/deploy/hub.sh \
-  >> ~/.local/state/xirra/hub.log 2>&1 < /dev/null &
+XPISODE_VENV=~/xpisode-site/.venv setsid nohup services/hub/run.sh \
+  >> ~/.local/state/hub.log 2>&1 < /dev/null &
 ```
 
 它先拉下 OSS 上所有的小记录，并把每条录制链接到挂载上，然后每分钟同步一次。成功的样子：日志里有 `pulled ... small files` 和 `linked ... recordings`；`curl -s localhost:8091/api/v1/tasks` 能列出任务。
+
+要建东西的人运行 `ssh -N -L 8091:localhost:8091 <服务器>`，浏览器打开 http://localhost:8091。
 
 ## 5. 配置并启动飞书机器人
 
@@ -71,7 +72,7 @@ mkdir -p ~/.config/xirra && cp services/feishu/deploy/env.example ~/.config/xirr
 chmod 600 ~/.config/xirra/env
 ```
 
-由负责人在 `~/.config/xirra/env` 里填飞书应用的 ID 和 Secret、大模型、日报群，以及 `WRITE_PANEL_URL=http://127.0.0.1:8091`。然后：
+由负责人在 `~/.config/xirra/env` 里填飞书应用的 ID 和 Secret、大模型、日报群。然后：
 
 ```bash
 services/feishu/.venv/bin/xirra check
@@ -79,12 +80,6 @@ setsid nohup services/feishu/deploy/run.sh >> ~/.local/state/xirra/bot.log 2>&1 
 ```
 
 有 systemd 的服务器，用 `services/feishu/deploy/xirra.service` 代替最后一行。成功的样子：`check` 每一项都不是 MISSING；日志里有 `connected to wss://...feishu.cn`；在飞书里给机器人发"进度"有回复。
-
-## 6. 认人
-
-不用手动配。新同事第一次给机器人发消息，机器人回一张「你是谁」卡片，从人员名单里选自己；名单里没有就填一个新名字，机器人加进名单。之后随时发「我是谁」可以重选。一个名字只能对应一个飞书账号。
-
-成功的样子：他发「我」，回答的是他自己的采集时长。
 
 ## 机器人知道的团队情况从哪来
 
@@ -104,5 +99,5 @@ setsid nohup services/feishu/deploy/run.sh >> ~/.local/state/xirra/bot.log 2>&1 
 | --- | --- |
 | 看机器人在做什么 | `tail -f ~/.local/state/xirra/bot.log` |
 | 重启机器人 | 用 `ps -eo pid,cmd \| grep "xirra bot"` 找到进程号，`kill <进程号>`，它 10 秒后自己起来 |
-| 看中心数据目录的同步 | `tail -f ~/.local/state/xirra/hub.log` |
-| 机器人写过什么 | `~/.local/state/xirra/proposals.jsonl`，每条提议和结果一行 |
+| 看中心数据目录的同步 | `tail -f ~/.local/state/hub.log` |
+| 大家问了机器人什么 | `~/.local/state/xirra/questions.jsonl`，一问一答一行 |

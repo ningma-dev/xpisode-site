@@ -4,15 +4,10 @@ The file (default ~/.config/xirra/env, mode 600) holds KEY=value lines:
 
     FEISHU_APP_ID, FEISHU_APP_SECRET      the Feishu self-built app
     PANEL_URL                             the panel the bot reads (http://127.0.0.1:8090)
-    WRITE_PANEL_URL                       the writable panel over the central host's data root;
-                                          empty: the bot cannot write
     LLM_BASE_URL, LLM_API_KEY, LLM_MODEL  an OpenAI-compatible chat API; empty: no free questions
     REPORT_CHAT_ID                        the group the daily report goes to; empty: none
     REPORT_AT                             HH:MM, Asia/Shanghai (default 09:00)
     STATE_DIR                             where caches and logs go (default ~/.local/state/xirra)
-
-People: STATE_DIR/people.toml maps a Feishu open_id to the person's xpisode name; people pick
-themselves from a card, so nobody edits it.
 """
 
 from __future__ import annotations
@@ -30,7 +25,6 @@ class Config:
     app_id: str
     app_secret: str
     panel_url: str
-    write_panel_url: str
     llm_base_url: str
     llm_api_key: str
     llm_model: str
@@ -61,14 +55,13 @@ def read_env(path: Path) -> dict[str, str]:
 
 def load(path: Path | None = None) -> Config:
     path = Path(os.environ.get("XIRRA_ENV", path or DEFAULT_ENV))
-    v = {**read_env(path), **{k: os.environ[k] for k in os.environ if k.startswith(("FEISHU_", "LLM_", "PANEL_", "WRITE_", "REPORT_", "STATE_"))}}
+    v = {**read_env(path), **{k: os.environ[k] for k in os.environ if k.startswith(("FEISHU_", "LLM_", "PANEL_", "REPORT_", "STATE_"))}}
     state = Path(v.get("STATE_DIR") or Path.home() / ".local" / "state" / "xirra")
     state.mkdir(parents=True, exist_ok=True)
     return Config(
         app_id=v.get("FEISHU_APP_ID", ""),
         app_secret=v.get("FEISHU_APP_SECRET", ""),
         panel_url=v.get("PANEL_URL", "http://127.0.0.1:8090").rstrip("/"),
-        write_panel_url=v.get("WRITE_PANEL_URL", "").rstrip("/"),
         llm_base_url=v.get("LLM_BASE_URL", ""),
         llm_api_key=v.get("LLM_API_KEY", ""),
         llm_model=v.get("LLM_MODEL", ""),

@@ -2,15 +2,16 @@
 # The central host's writable data root and its sync, kept running:
 #   - every minute: pull every small thing from OSS and link each recording to the bucket
 #     mount (xpisode-site scripts/oss.py pull --link), then push what was written here;
-#   - a writable xpisode panel over it on 127.0.0.1:$HUB_PORT, which the bot writes through.
+#   - a writable xpisode panel over it on 127.0.0.1:$HUB_PORT: where the team's tasks, plans and
+#     datasets are made (reached over an ssh tunnel); the stations pull them within a minute.
 # Records are local; recordings are read where they are on the mount; nothing writes the mount.
 #
-#     setsid nohup services/feishu/deploy/hub.sh >> ~/.local/state/xirra/hub.log 2>&1 < /dev/null &
+#     setsid nohup services/hub/run.sh >> ~/.local/state/hub.log 2>&1 < /dev/null &
 #
 # Needs: ~/.ossutilconfig with a key that may upload (the user puts it there), the xpisode
 # environment ($XPISODE_VENV), and this repo's scripts/oss.py.
 set -u
-site="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd)"
+site="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 HUB_ROOT="${HUB_ROOT:-$HOME/xirra/hub}"
 HUB_PORT="${HUB_PORT:-8091}"
 MOUNT="${MOUNT:-/mnt/data_oss/xpisode_data}"

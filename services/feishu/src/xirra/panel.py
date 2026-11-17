@@ -52,32 +52,3 @@ class Panel:
 
     def derivations(self) -> Any:
         return self._get("/api/v1/derivations")
-
-
-class Writer:
-    """Writes through a writable panel over the central host's data root (local records,
-    recordings linked to the bucket mount); its sync pushes what it writes to OSS."""
-
-    def __init__(self, url: str, timeout: float = 300.0) -> None:
-        self.http = httpx.Client(base_url=url, timeout=timeout)
-
-    def _send(self, method: str, path: str, body: dict[str, Any]) -> Any:
-        r = self.http.request(method, path, json=body, headers={"X-Xpisode-Via": "api"})
-        if r.status_code >= 400:
-            raise RuntimeError(f"{r.status_code}: {r.text[:500]}")
-        return r.json()
-
-    def save_task(self, name: str, **body: Any) -> Any:
-        return self._send("PUT", f"/api/v1/tasks/{name}", body)
-
-    def create_plan(self, **body: Any) -> Any:
-        return self._send("POST", "/api/v1/plans", body)
-
-    def revise_plan(self, plan_id: str, **body: Any) -> Any:
-        return self._send("PUT", f"/api/v1/plans/{plan_id}", body)
-
-    def create_dataset(self, **body: Any) -> Any:
-        return self._send("POST", "/api/v1/datasets", body)
-
-    def add_person(self, name: str, by: str) -> Any:
-        return self._send("POST", "/api/v1/people", {"name": name, "by": by})
