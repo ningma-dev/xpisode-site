@@ -336,9 +336,17 @@ def remote_sizes(remote: str, keys: Iterable[str], *, config: Path | None = None
     return {k: s for k, s in there.items() if k in wanted}
 
 
-def copy_listed(source: str, target: str, keys: list[str], *, config: Path | None = None) -> None:
+def copy_listed(
+    source: str,
+    target: str,
+    keys: list[str],
+    *,
+    config: Path | None = None,
+    replace: bool = False,
+) -> None:
     """``ossutil cp -r`` of ``keys``, relative to ``source``, into ``target``; up, an object
-    already there is left as it is (its size is checked after)."""
+    already there is left as it is (its size is checked after), unless ``replace`` (a
+    conversion, store.md 2.2: the admin's config, the new file over the old)."""
     with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as listing:
         listing.write("\n".join(keys) + "\n")
     up = target.startswith("oss://")
@@ -351,7 +359,7 @@ def copy_listed(source: str, target: str, keys: list[str], *, config: Path | Non
             "--files-from",
             listing.name,
             *TRANSFER.options(),
-            *(["--ignore-existing"] if up else []),
+            *(["-f"] if replace else ["--ignore-existing"] if up else []),
             config=config,
         )  # its own report is kept back: the push's progress lines say it
     finally:
@@ -755,6 +763,7 @@ def convert_remote(
 
     from xpisode_format.conversions import record_conversion
     from xpisode_format.runs import Conversion
+    from xpisode_format.store import file_sha256
 
     who = check_who(who)
     index = remote_index(root, remote, config=admin_config)
@@ -771,10 +780,41 @@ def convert_remote(
         todo.append((episode_id, str(document.get("sha256", ""))))
     if limit is not None:
         todo = todo[:limit]
-    print(f"{len(todo)} recordings on OSS to look at", flush=True)
     done: list[tuple[Conversion, list[Local]]] = []
     count = 0
     started = time.time_ns()
+    # What an earlier run converted here and did not record: sent (again) and recorded first.
+    left = {p.stem: p for p in (root / "store" / "episodes").glob("*/*/*.mcap")}
+    for episode_id, path in sorted(left.items()):
+        document = index.documents.get(("episode", episode_id), {})
+        before = str(document.get("sha256", ""))
+        after = file_sha256(path)
+        if not before or before == after or converted.get(episode_id) == after:
+            continue
+        files = [
+            Local(k, root / "store" / k, (root / "store" / k).stat().st_size)
+            for k in episode_keys(episode_id)
+            if (root / "store" / k).is_file()
+        ]
+        there = remote_sizes(remote, [f.key for f in files], config=admin_config)
+        if any(there.get(f.key) != f.bytes for f in files):
+            copy_listed(
+                f"{root / 'store'}/",
+                remote,
+                [f.key for f in files],
+                config=admin_config,
+                replace=True,
+            )
+        conversion = Conversion(
+            episode=f"episode:{episode_id}",
+            before=f"sha256:{before}",
+            after=f"sha256:{after}",
+            bytes=path.stat().st_size,
+        )
+        done.append((conversion, files))
+        print(f"{episode_id}: left by an earlier run, {before[:8]} -> {after[:8]}", flush=True)
+    todo = [(e, b) for e, b in todo if e not in left]
+    print(f"{len(todo)} recordings on OSS to look at", flush=True)
 
     def flush() -> None:
         nonlocal done, started
@@ -803,6 +843,7 @@ def convert_remote(
         done = []
         started = time.time_ns()
 
+    flush()
     with ProcessPoolExecutor(max_workers=workers) as pool:
         futures = {
             pool.submit(
@@ -827,7 +868,13 @@ def convert_remote(
                 if (root / "store" / k).is_file()
             ]
             # the recording, then its sidecar and thumbnail, over the old ones
-            upload(root / "store", remote, files, admin_config)
+            copy_listed(
+                f"{root / 'store'}/",
+                remote,
+                [f.key for f in files],
+                config=admin_config,
+                replace=True,
+            )
             there = remote_sizes(remote, [f.key for f in files], config=admin_config)
             wrong = [f.key for f in files if there.get(f.key) != f.bytes]
             if wrong:
@@ -864,7 +911,7 @@ def _convert_one(
     if not source.is_file() or not convertible(source):
         return None
     if before and file_sha256(source) != before:
-        raise SystemExit(f"{key} on the mount is not the file its sidecar names")
+        raise RuntimeError(f"{key} on the mount is not the file its sidecar names")
     target = Path(root) / "store" / key
     work = Path(root) / "local" / "convert" / episode_id
     shutil.rmtree(work, ignore_errors=True)
@@ -872,7 +919,7 @@ def _convert_one(
         made = convert(source, work, encoder=encoder)
         report = verify(made, decode_ffv1=False)
         if not report.ok:
-            raise SystemExit(f"the converted file does not read whole: {report.problems[0]}")
+            raise RuntimeError(f"the converted file does not read whole: {report.problems[0]}")
         target.parent.mkdir(parents=True, exist_ok=True)
         for stale in (target, target.with_suffix(".json"), target.with_suffix(".jpg")):
             stale.unlink(missing_ok=True)
