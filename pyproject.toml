@@ -39,13 +39,13 @@ data = "~/xpisode-data"
 
 # Pinned exact commits. Change them only together with uv.lock.
 [tool.uv.sources]
-xpisode = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "01d6d596408702c1feea81860ca3432d3263adc2" }
-xpisode-format = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "01d6d596408702c1feea81860ca3432d3263adc2", subdirectory = "packages/xpisode-format" }
-xpisode-device = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "01d6d596408702c1feea81860ca3432d3263adc2", subdirectory = "packages/xpisode-device" }
-xpisode-env = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "01d6d596408702c1feea81860ca3432d3263adc2", subdirectory = "packages/xpisode-env" }
-xpisode-realsense = { git = "ssh://git@github.com/ningma-dev/xpisode-realsense.git", rev = "223c00d192fe4bc668abe096be6d292023a145c0" }
+xpisode = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "537e03364a9415ebd809d3406f29c1c6ab3974b3" }
+xpisode-format = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "537e03364a9415ebd809d3406f29c1c6ab3974b3", subdirectory = "packages/xpisode-format" }
+xpisode-device = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "537e03364a9415ebd809d3406f29c1c6ab3974b3", subdirectory = "packages/xpisode-device" }
+xpisode-env = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "537e03364a9415ebd809d3406f29c1c6ab3974b3", subdirectory = "packages/xpisode-env" }
+xpisode-realsense = { git = "ssh://git@github.com/ningma-dev/xpisode-realsense.git", rev = "c1c46b9e21c8c5bfbc38ce7904ff1f142727308a" }
 xpisode-i2rt = { git = "ssh://git@github.com/ningma-dev/xpisode-i2rt.git", rev = "c458074178b99bb0dac2cdbb18d1f2926338c28c" }
-xpisode-abc-gello = { git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git", rev = "2d7f4977fb2d1ce09b30f6368a5311a7d2436a81" }
+xpisode-abc-gello = { git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git", rev = "93f63449b7096cebd45f72d8ee53615432302549" }
 
 [dependency-groups]
 # The adapters' tests can run in this environment too.
