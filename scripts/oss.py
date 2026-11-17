@@ -450,6 +450,10 @@ class RemoteIndex:
     segments: int = 0
     disagreements: list[tuple[str, str]] = field(default_factory=list[tuple[str, str]])
     """Identities seen with two contents: a record rewritten (store.md 2.2)."""
+    alternatives: dict[tuple[str, str], list[dict[str, Any]]] = field(
+        default_factory=dict[tuple[str, str], list[dict[str, Any]]]
+    )
+    """An Episode's sidecars that differ: one before its conversion, one after (``settle``)."""
 
     def add(self, documents: Iterable[dict[str, Any]]) -> None:
         for document in documents:
@@ -459,7 +463,40 @@ class RemoteIndex:
             identity = shown[0]
             before = self.documents.setdefault(identity, document)
             if before != document:
+                if identity[0] == "episode":
+                    self.alternatives.setdefault(identity, [before]).append(document)
+                else:
+                    self.disagreements.append(identity)
+
+    def conversions(self) -> dict[str, str]:
+        """Each converted Episode's file now (``sha256`` hex), by the conversion records in
+        the index; the latest record of an Episode counts."""
+        found: dict[str, tuple[int, str]] = {}
+        for (kind, _), document in self.documents.items():
+            if kind != "run":
+                continue
+            at = int(document.get("ended_unix_ns", 0))
+            for conversion in document.get("converts", ()):
+                try:
+                    episode_id = parse_episode(str(conversion["episode"]))[0]
+                    after = str(conversion["after"]).removeprefix("sha256:")
+                except (KeyError, TypeError, ValueError):
+                    continue
+                if episode_id not in found or found[episode_id][0] <= at:
+                    found[episode_id] = (at, after)
+        return {e: a for e, (_, a) in found.items()}
+
+    def settle(self) -> None:
+        """An Episode with two sidecars is a rewrite unless a conversion record says which
+        file it is now: then that file's sidecar is the one."""
+        now = self.conversions()
+        for identity, documents in self.alternatives.items():
+            after = now.get(identity[1])
+            chosen = next((d for d in documents if d.get("sha256") == after), None)
+            if chosen is None:
                 self.disagreements.append(identity)
+            else:
+                self.documents[identity] = chosen
 
     def keys(self) -> dict[str, int | None]:
         """Each key OSS holds by the index, with its size where a line says it."""
@@ -559,12 +596,291 @@ def remote_index(
             index.add(read_segment(path.read_bytes()))
         except (OSError, zstandard.ZstdError) as error:
             print(f"index segment {path.name} unreadable here: {error}")
+    index.settle()
     for kind, ident in index.disagreements[:5]:
         print(f"index: two different {kind} records {ident} on OSS (a store file rewritten)")
     return index
 
 
 # -- push ------------------------------------------------------------------------------------
+
+
+def apply_conversions(root: Path) -> list[str]:
+    """Remove the recordings here that a conversion record replaced and that went up as
+    they were (store.md 2.2): OSS holds the recording as it is now. A recording converted
+    here is the file the record names, and stays."""
+    try:
+        from xpisode_format.conversions import conversions
+    except ImportError:  # a framework from before conversions
+        return []
+    ledger = Ledger(root)
+    removed: list[str] = []
+    for episode_id, conversion in sorted(conversions(root).items()):
+        key = episode_keys(episode_id)[0]
+        path = root / "store" / key
+        if path.is_symlink() or not path.is_file() or path.stat().st_size == conversion.bytes:
+            continue
+        if ledger.state(key) != "pushed":
+            continue  # never went up: not the file OSS replaced; left as it is
+        with ledger_lock(root):
+            path.unlink()
+        removed.append(episode_id)
+    return removed
+
+
+def station_busy(panel: str = PANEL) -> bool:
+    """Whether this machine's station records now (or may: it runs, and its panel does not
+    answer). Converting takes the cores and memory bandwidth the cameras need."""
+    station = os.environ.get("XPISODE_STATION", "")
+    if station:
+        try:
+            with urllib.request.urlopen(f"{panel}/api/v1/stations/{station}", timeout=3) as r:
+                status = json.load(r).get("status") or {}
+            return bool(status.get("recording") or status.get("busy"))
+        except (OSError, ValueError):
+            pass
+    found = subprocess.run(["pgrep", "-f", "bin/xpisode run"], capture_output=True, check=False)
+    return found.returncode == 0
+
+
+WHO_CONVERTS = "xpisode-sync"
+"""Who converts a station's own recordings: this program, on the station's behalf."""
+
+
+def convert_local(root: Path, *, panel: str = PANEL, encoder: str = "nvenc") -> int:
+    """Store this machine's recordings that never went up with their images as AV1, as the
+    station records them now (design 7.4), before they go up: each converted in a folder
+    of its own, read through, then put in place of the old one, its sidecar and thumbnail
+    made again, and a conversion record written. Stops while the station records. How many
+    were converted."""
+    try:
+        from xpisode_format.conversions import record_conversion
+        from xpisode_format.convert import convert, convertible
+        from xpisode_format.runs import Conversion
+        from xpisode_format.sidecar import ensure, sidecar_path, thumbnail_path
+        from xpisode_format.store import file_sha256
+        from xpisode_format.verify import verify
+    except ImportError:  # a framework from before conversions
+        return 0
+    from xpisode_format import sync
+
+    ledger = Ledger(root)
+    gone = deleted(root)
+    done = 0
+    work = root / "local" / "convert"
+    for path in sorted((root / "store" / "episodes").glob("*/*/*.mcap")):
+        episode_id = path.stem
+        if episode_id in gone or path.is_symlink():
+            continue
+        if ledger.state(episode_keys(episode_id)[0]) is not None:
+            continue  # went up (or is going) as it is: OSS's copy is converted there
+        if sync.checked(root, episode_id) is not None or sealed(root, episode_id) is None:
+            continue  # read through already: in its final form (converting comes first)
+        try:
+            if not convertible(path):
+                continue
+        except Exception as error:  # noqa: BLE001 - one bad file must not stop the rest
+            print(f"{episode_id}: cannot be read to convert: {error}")
+            continue
+        if station_busy(panel):
+            print("the station records: converting waits", flush=True)
+            break
+        started = time.time_ns()
+        shutil.rmtree(work, ignore_errors=True)
+        try:
+            made = convert(path, work, encoder=encoder)
+            report = verify(made, decode_ffv1=False)
+            if not report.ok:
+                print(f"{episode_id}: the converted file does not read whole: {report.problems[0]}")
+                continue
+            before, after = file_sha256(path), file_sha256(made)
+            size = made.stat().st_size
+            os.chmod(made, path.stat().st_mode & 0o777)
+            with ledger_lock(root):
+                if ledger.state(episode_keys(episode_id)[0]) is not None:
+                    continue  # went up meanwhile
+                os.replace(made, path)
+                for stale in (
+                    sidecar_path(path),
+                    thumbnail_path(path),
+                    sync.checked_path(root, episode_id),
+                ):
+                    stale.unlink(missing_ok=True)
+            ensure(path)
+            record_conversion(
+                root,
+                [
+                    Conversion(
+                        episode=f"episode:{episode_id}",
+                        before=f"sha256:{before}",
+                        after=f"sha256:{after}",
+                        bytes=size,
+                    )
+                ],
+                who=WHO_CONVERTS,
+                started_unix_ns=started,
+                params={"encoder": encoder, "quality": 28, "keyframe_interval": 10},
+                note="images stored as AV1 before going up",
+            )
+            done += 1
+            print(
+                f"{episode_id}: converted, {before[:8]} -> {after[:8]}, {size / 1e6:.1f} MB",
+                flush=True,
+            )
+        except Exception as error:  # noqa: BLE001 - one bad file must not stop the rest
+            print(f"{episode_id}: not converted: {error}", flush=True)
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
+    return done
+
+
+def convert_remote(
+    root: Path,
+    remote: str,
+    mount: Path,
+    *,
+    admin_config: Path,
+    who: str,
+    encoder: str = "svt",
+    workers: int = 16,
+    limit: int | None = None,
+    batch: int = 20,
+) -> int:
+    """On a central host over the bucket mount: store every recording on OSS with its
+    images as AV1 (design 7.4), in place, by the admin's ossutil config. Each is converted
+    from the mount into this root, read through, then its recording, sidecar and thumbnail
+    go up over the old; every ``batch`` of them a conversion record goes up with an index
+    segment, and the files here are removed. How many were converted."""
+    from concurrent.futures import ProcessPoolExecutor, as_completed
+
+    from xpisode_format.conversions import record_conversion
+    from xpisode_format.runs import Conversion
+
+    who = check_who(who)
+    index = remote_index(root, remote, config=admin_config)
+    if index is None:
+        raise SystemExit(f"no index on {remote}")
+    converted = index.conversions()
+    gone = index.deleted()
+    todo: list[tuple[str, str]] = []
+    for (kind, episode_id), document in sorted(index.documents.items()):
+        if kind != "episode" or episode_id in gone:
+            continue
+        if converted.get(episode_id) == document.get("sha256"):
+            continue
+        todo.append((episode_id, str(document.get("sha256", ""))))
+    if limit is not None:
+        todo = todo[:limit]
+    print(f"{len(todo)} recordings on OSS to look at", flush=True)
+    done: list[tuple[Conversion, list[Local]]] = []
+    count = 0
+    started = time.time_ns()
+
+    def flush() -> None:
+        nonlocal done, started
+        if not done:
+            return
+        record = record_conversion(
+            root,
+            [c for c, _ in done],
+            who=who,
+            started_unix_ns=started,
+            params={"encoder": encoder, "quality": 28, "keyframe_interval": 10},
+            note="images stored as AV1 (design 7.4); the old files are replaced on OSS",
+        )
+        path = record_path(root, record.run)
+        own = Local(path.relative_to(root / "store").as_posix(), path, path.stat().st_size)
+        ledger = Ledger(root)
+        send(root, remote, [own], ledger, admin_config)
+        segment = Segment(root)
+        segment.add([f for _, files in done for f in files if f.key.endswith(".json")])
+        segment.add([own])
+        segment.publish(root, remote, admin_config)
+        for _, files in done:
+            for f in files:
+                f.path.unlink(missing_ok=True)
+        print(f"conversion record {record.run}: {len(done)} recordings", flush=True)
+        done = []
+        started = time.time_ns()
+
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        futures = {
+            pool.submit(
+                _convert_one, str(mount), str(root), episode_id, before, encoder
+            ): episode_id
+            for episode_id, before in todo
+        }
+        for future in as_completed(futures):
+            episode_id = futures[future]
+            try:
+                result = future.result()
+            except Exception as error:  # noqa: BLE001 - one bad file must not stop the rest
+                print(f"{episode_id}: not converted: {error}", flush=True)
+                continue
+            if result is None:
+                continue  # nothing to convert
+            before, after, size = result
+            keys = episode_keys(episode_id)
+            files = [
+                Local(k, root / "store" / k, (root / "store" / k).stat().st_size)
+                for k in keys
+                if (root / "store" / k).is_file()
+            ]
+            # the recording, then its sidecar and thumbnail, over the old ones
+            upload(root / "store", remote, files, admin_config)
+            there = remote_sizes(remote, [f.key for f in files], config=admin_config)
+            wrong = [f.key for f in files if there.get(f.key) != f.bytes]
+            if wrong:
+                raise SystemExit(f"after upload, OSS does not hold {wrong} as made here")
+            Ledger(root).mark(((f.key, f.bytes) for f in files), "pushed")
+            conversion = Conversion(
+                episode=f"episode:{episode_id}",
+                before=f"sha256:{before}",
+                after=f"sha256:{after}",
+                bytes=size,
+            )
+            done.append((conversion, files))
+            count += 1
+            print(f"{episode_id}: {before[:8]} -> {after[:8]}, {size / 1e6:.1f} MB", flush=True)
+            if len(done) >= batch:
+                flush()
+    flush()
+    return count
+
+
+def _convert_one(
+    mount: str, root: str, episode_id: str, before: str, encoder: str
+) -> tuple[str, str, int] | None:
+    """In a worker: convert one recording from the mount into ``root``'s store and make its
+    sidecar and thumbnail; what its file was and is now, and its size. None if it has no
+    image to convert (or is gone from the mount)."""
+    from xpisode_format.convert import convert, convertible
+    from xpisode_format.sidecar import ensure
+    from xpisode_format.store import file_sha256
+    from xpisode_format.verify import verify
+
+    key = episode_keys(episode_id)[0]
+    source = Path(mount) / "store" / key
+    if not source.is_file() or not convertible(source):
+        return None
+    if before and file_sha256(source) != before:
+        raise SystemExit(f"{key} on the mount is not the file its sidecar names")
+    target = Path(root) / "store" / key
+    work = Path(root) / "local" / "convert" / episode_id
+    shutil.rmtree(work, ignore_errors=True)
+    try:
+        made = convert(source, work, encoder=encoder)
+        report = verify(made, decode_ffv1=False)
+        if not report.ok:
+            raise SystemExit(f"the converted file does not read whole: {report.problems[0]}")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        for stale in (target, target.with_suffix(".json"), target.with_suffix(".jpg")):
+            stale.unlink(missing_ok=True)
+        os.replace(made, target)
+        ensure(target)
+        return before or file_sha256(source), file_sha256(target), target.stat().st_size
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
 
 
 def read_through(root: Path) -> None:
@@ -1054,6 +1370,7 @@ def push(
     too."""
     started = time.time_ns()
     now = now_unix_ns if now_unix_ns is not None else started
+    convert_local(root)
     make_sidecars(root)
     read_through(root)
     ledger = Ledger(root)
@@ -1518,6 +1835,20 @@ def pull(
     ledger = Ledger(root)
     wanted: list[str] = []
     known: list[tuple[str, int]] = []
+    converted = state.index.conversions() if state.index is not None else {}
+    for key, size in sorted(there.items()):
+        episode = episode_file(key)
+        if (
+            episode is not None
+            and episode[0] in converted
+            and episode[1] != "mcap"
+            and size is not None
+            and (root / "store" / key).exists()
+            and (root / "store" / key).stat().st_size != size
+        ):
+            # a sidecar of the recording before its conversion: the new one replaces it
+            with ledger_lock(root):
+                (root / "store" / key).unlink()
     for key, size in sorted(there.items()):
         if ignored(key) or not small(key):
             continue
@@ -1547,6 +1878,9 @@ def pull(
         with open(no_thumbnails_path(root, remote), "a") as file:
             file.write("".join(f"{k}\n" for k in missing))
     removed = apply_deletions(root)
+    replaced = apply_conversions(root)
+    if replaced:
+        print(f"removed {len(replaced)} recordings here that OSS holds converted", flush=True)
     if copied or removed or episodes:  # the minutely records pull says nothing when idle
         print(
             f"pulled {len(copied)} small files from {remote}"
@@ -2151,6 +2485,13 @@ def main(argv: list[str] | None = None) -> None:
     d.add_argument("--admin-config", type=Path, required=True, help="the admin's ossutil config")
     d.add_argument("--who", default=os.environ.get("XPISODE_WHO", ""), help="default XPISODE_WHO")
     d.add_argument("--yes", action="store_true", help="do not ask")
+    c = commands.add_parser("convert")
+    c.add_argument("--admin-config", type=Path, required=True, help="the admin's ossutil config")
+    c.add_argument("--mount", type=Path, default=MOUNT, help=f"read-only data root ({MOUNT})")
+    c.add_argument("--who", default=os.environ.get("XPISODE_WHO", ""), help="default XPISODE_WHO")
+    c.add_argument("--encoder", default="svt", choices=["svt", "nvenc"])
+    c.add_argument("--workers", type=int, default=16)
+    c.add_argument("--limit", type=int, help="at most this many recordings")
     e = commands.add_parser("evict")
     e.add_argument("--days", type=float, default=7.0)
     e.add_argument("--free-gb", type=float, help="stop once this much is freed")
@@ -2208,6 +2549,23 @@ def main(argv: list[str] | None = None) -> None:
             who=who,
             admin_config=args.admin_config,
             yes=args.yes,
+        )
+    elif args.command == "convert":
+        try:
+            who = check_who(args.who)
+        except ValueError as error:
+            raise SystemExit(f"--who (or XPISODE_WHO): {error}") from None
+        if root.resolve() == args.mount.resolve():
+            raise SystemExit("--root is where converted files are made: not the mount")
+        convert_remote(
+            root,
+            remote,
+            args.mount,
+            admin_config=args.admin_config,
+            who=who,
+            encoder=args.encoder,
+            workers=args.workers,
+            limit=args.limit,
         )
     elif args.command == "evict":
         free = int(args.free_gb * 1e9) if args.free_gb is not None else None

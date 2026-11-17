@@ -39,13 +39,13 @@ data = "~/xpisode-data"
 
 # Pinned exact commits. Change them only together with uv.lock.
 [tool.uv.sources]
-xpisode = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "537e03364a9415ebd809d3406f29c1c6ab3974b3" }
-xpisode-format = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "537e03364a9415ebd809d3406f29c1c6ab3974b3", subdirectory = "packages/xpisode-format" }
-xpisode-device = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "537e03364a9415ebd809d3406f29c1c6ab3974b3", subdirectory = "packages/xpisode-device" }
-xpisode-env = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "537e03364a9415ebd809d3406f29c1c6ab3974b3", subdirectory = "packages/xpisode-env" }
+xpisode = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "15c2ecd037e6e6f8d5f0ce6febc028f0cf4822f7" }
+xpisode-format = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "15c2ecd037e6e6f8d5f0ce6febc028f0cf4822f7", subdirectory = "packages/xpisode-format" }
+xpisode-device = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "15c2ecd037e6e6f8d5f0ce6febc028f0cf4822f7", subdirectory = "packages/xpisode-device" }
+xpisode-env = { git = "ssh://git@github.com/ningma-dev/xpisode.git", rev = "15c2ecd037e6e6f8d5f0ce6febc028f0cf4822f7", subdirectory = "packages/xpisode-env" }
 xpisode-realsense = { git = "ssh://git@github.com/ningma-dev/xpisode-realsense.git", rev = "c1c46b9e21c8c5bfbc38ce7904ff1f142727308a" }
 xpisode-i2rt = { git = "ssh://git@github.com/ningma-dev/xpisode-i2rt.git", rev = "c458074178b99bb0dac2cdbb18d1f2926338c28c" }
-xpisode-abc-gello = { git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git", rev = "93f63449b7096cebd45f72d8ee53615432302549" }
+xpisode-abc-gello = { git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git", rev = "43e9da61cd2e8e03f4bf14329c8bbe22dcf46785" }
 
 [dependency-groups]
 # The adapters' tests can run in this environment too.
