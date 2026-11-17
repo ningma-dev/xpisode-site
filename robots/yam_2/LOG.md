@@ -35,3 +35,10 @@
 ## 2026-11-17 · Claude（ningma 要求）· 关掉后台面板
 - 更新后用 `setsid nohup scripts/serve.sh` 开的面板（127.0.0.1:8043）不挂在任何终端上，按 PID 发 SIGINT 关掉了；8043 已空出来
 - 同步服务 `xpisode-sync` 没动，还在上传
+
+## 2026-11-17 · Codex · 配置阿里云 SSH（用户直接指令）
+- 版本：xpisode-site 25f7a99。
+- 操作依据：用户要求为 5090_1、5090_2、5090_3 配置 `ssh aliyun`；部署文档没有对应步骤。
+- 结果：本机 `~/.ssh/config` 新增 `Host aliyun`，使用本机已有身份文件；阿里云只追加本机公钥授权，保留已有授权和 SSH 服务设置。
+- 验证：禁用 agent 后，`ssh aliyun` 通过公钥认证并能读取指定 checkpoint；本机已安装 rsync。
+- 密钥内容未写入仓库，未复制或更换私钥。

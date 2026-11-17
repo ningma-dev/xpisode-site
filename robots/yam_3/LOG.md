@@ -59,3 +59,24 @@
 - 同步服务 `xpisode-sync` 已装上并在运行：拉下 424 个小记录，传上 25 个小文件
 - 还没做：`sudo loginctl enable-linger ubuntu`（要 sudo）。在那之前，桌面登录着服务才运行
 - 和文档不一样的地方：无
+
+## 2026-11-17 · ningma + Claude · pack_and_pour_fruit 的计划
+- 任务用原有版本 pack_and_pour_fruit（sha256:4faf82ac…，RoboDojo，11-14 建的，已经从 OSS 同步到本机）
+- 计划：pack_and_pour_fruit_yam_3_20261117，150 行，站点 yam_3
+- 面板原本没开：临时用 `scripts/serve.sh` 开了面板，用 API 建完计划，同一分钟内按 Ctrl+C 的方式关掉了；站点没动
+- 同步服务（`oss.py push --follow`）开着，会推到 OSS
+
+## 2026-11-17 · Codex · 配置阿里云 SSH（用户直接指令）
+- 版本：xpisode-site 25f7a99。
+- 操作依据：用户要求为 5090_1、5090_2、5090_3 配置 `ssh aliyun`；部署文档没有对应步骤。
+- 结果：本机 `~/.ssh/config` 新增 `Host aliyun`，使用本机已有身份文件；阿里云只追加本机公钥授权，保留已有授权和 SSH 服务设置。
+- 验证：禁用 agent 后，`ssh aliyun` 通过公钥认证并能读取指定 checkpoint；本机已安装 rsync。
+- 密钥内容未写入仓库，未复制或更换私钥。
+
+## 2026-11-17 · Codex · AB20 推理接入调查
+- 版本：xpisode-site 25f7a99，部署固定的 xpisode 01d6d59；依据框架 policy 教程和 xpisode-integration 技能进行接口检查。
+- 操作依据：用户要求检查下载进度及如何接入 xpisode，并明确允许通过 SSH 只读检查阿里云的 AB20 代码、配置和统计。
+- 结果：本机 steps_351480_pytorch_model.pt 为 10,234,428,329 字节，传输日志记录 SHA-256 校验通过。远端 CanonicalPolicy 对 step 351480、route ab17_abc130k_mdfb99e07_f30_l0 的 CPU 配置检查通过；未加载模型权重或运行 GPU 推理。
+- 接口：三路相机实际使用 cam_*/frame 的 color 字段；模型输入为经过坐标修正的 96 维物理状态，输出为 30 Hz、30 步的绝对末端位姿和夹爪，需要 YAM 正运动学、训练坐标修正及逆运动学适配后发送 joint_position。模型夹爪为 closure，站点为 aperture。
+- 待完成：同步配套代码、run 配置与统计、基础模型和 tokenizer；建立适配 RTX 5090 的独立推理环境；核实训练转换器的 YAM 坐标修正并实现适配；完成离线和回放验证。现有 replay_check.py 引用的 replay_compare.py 在本机缺失。
+- 本次未启动站点、相机或控制客户端，未提交训练或修改远端文件；只追加本地调查日志。
