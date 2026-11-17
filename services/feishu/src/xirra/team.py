@@ -12,6 +12,7 @@ Read again at most every few minutes, so a new task, station or person shows up 
 from __future__ import annotations
 
 import datetime as dt
+import re
 import time
 from collections import Counter, defaultdict
 from collections.abc import Callable
@@ -45,9 +46,11 @@ def stations(site: Path | None) -> dict[str, dict[str, Any]]:
                 continue
             files = sorted(p.name for p in d.glob("station*.toml"))
             about = ""
-            if (d / "station.toml").exists():
+            if retired:
+                pass  # what is left of a retired station describes leftovers, not the robot
+            elif (d / "station.toml").exists():
                 first = (d / "station.toml").read_text().splitlines()[:1]
-                about = first[0].lstrip("# ").strip() if first else ""
+                about = first[0].lstrip("# ").strip().split(". ")[0].rstrip(".") if first else ""
             elif (d / "README.md").exists():
                 lines = [ln.strip() for ln in (d / "README.md").read_text().splitlines() if ln.strip() and not ln.startswith("#")]
                 about = lines[0] if lines else ""
@@ -120,7 +123,7 @@ class Team:
             zh = ""
             if self.translate is not None:
                 try:
-                    zh = (self.translate(name) or "").splitlines()[0]
+                    zh = re.sub(r"^(任务)?(概括)?[:：]\s*", "", (self.translate(name) or "").splitlines()[0].strip())
                 except Exception:  # noqa: BLE001 - the summary is a help, not a need
                     zh = ""
             bits = [zh or (task.get("instruction") or "")]

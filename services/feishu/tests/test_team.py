@@ -33,12 +33,12 @@ def test_stations_and_retired_come_from_robots(tmp_path):
     root = site(tmp_path)
     found = team.stations(root)
     assert set(found) == {"yam_2", "yam_abc"}
-    assert found["yam_2"]["about"].startswith("Station yam_2 on machine ubuntu2")
+    assert found["yam_2"]["about"] == "Station yam_2 on machine ubuntu2: two YAM pairs"
     assert team.retired(root) == {"yam_abc"}
 
 
 def test_the_team_text_says_who_did_what_where(tmp_path):
-    text = team.Team(FakePanel(), site(tmp_path), lambda name: "把测温棒插到测温枪头上\n更多").text()
+    text = team.Team(FakePanel(), site(tmp_path), lambda name: "任务概括：把测温棒插到测温枪头上\n更多").text()
     assert "insert_temperature_probe：把测温棒插到测温枪头上" in text
     assert "yam_abc：已退役" in text and "1 条没记采集员是谁" in text
     assert "jianping_yin：采集 1 条" in text and "ningma：判断 1 条" in text
