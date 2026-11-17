@@ -31,3 +31,7 @@
 - 还没做：`sudo loginctl enable-linger ubuntu`（要 sudo）。在那之前，桌面登录着服务才运行
 - 本机有两个没提交的调参文件 `tuned/can_follower_l.json`、`tuned/can_follower_r.json`
 - 和文档不一样的地方：无
+
+## 2026-11-17 · Claude（ningma 要求）· 关掉后台面板
+- 更新后用 `setsid nohup scripts/serve.sh` 开的面板（127.0.0.1:8043）不挂在任何终端上，按 PID 发 SIGINT 关掉了；8043 已空出来
+- 同步服务 `xpisode-sync` 没动，还在上传
