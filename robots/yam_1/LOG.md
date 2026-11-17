@@ -23,3 +23,12 @@
 - 新建任务（来自 RoboDojo 真机任务，instruction 照原文）：cap_pen、hang_mugs、sweep_blocks、fill_pen_holder、stack_and_cover_blocks、stack_bowls、stand_up_bottles、pack_and_pour_fruit、cover_blocks。stack_bowls、hang_mugs 接在 OSS 上旧版本之后
 - 写在 ubuntu1 本机，还没有计划
 - 九个任务的 description 加上了 RoboDojo 的部分得分档；建计划时用判断时的"得分"选项记下来（替换了上一版，上一版没上过 OSS）
+
+## 2026-11-17 · Claude（ningma 同意）· 更新版本，打开同步（docs/guides/update.md，acceptance.md「打开同步」）
+- 站点开着但没在录（最后一条录制 12:00）；12:14 停了站点和面板（同 Ctrl+C），更新后用 `scripts/serve.sh` 重新开了面板，站点没有重启
+- 版本：本仓库 eccc09c → 25f7a99；`uv sync --locked`、`scripts/build_pinned.sh` 通过，体检 0 FAIL
+- `host/setup.sh` 这次只改了参数写法，系统设置没变，没有重跑
+- 同步服务 `xpisode-sync` 已装上并在运行：拉下 268 个小记录，待上传 1296 个文件、256 GB
+- 还没做：`sudo loginctl enable-linger ubuntu`（要 sudo）。在那之前，桌面登录着服务才运行
+- 本机有两个没提交的调参文件 `tuned/can_follower_l.json`、`tuned/can_follower_r.json`，和上次手动上传留下的 `ossutil_output/`
+- 和文档不一样的地方：无
