@@ -57,9 +57,9 @@ that exists on both sides with two sizes (or, for a record, two contents) is a c
 stops everything.
 
 Going up (store.md 7): an Episode only once ``xpisode_format.sync.pushable`` (a plan's
-recording once judged, any other 10 minutes after it was sealed), its ``.mcap`` before its
-sidecar and thumbnail; run records after their files. Each key is marked ``uploading`` in
-the upload ledger (``local/sync/ledger.jsonl``) under its lock before it is sent and
+recording once judged, any other 10 minutes after it was sealed; either only once it was read
+through whole, ``read_through``), its ``.mcap`` before its sidecar and thumbnail; run records
+after their files. Each key is marked ``uploading`` in the upload ledger (``local/sync/ledger.jsonl``) under its lock before it is sent and
 ``pushed`` once OSS holds it at its size, so deleting at the source never removes what may
 have left. Keys pulled from OSS are marked ``pushed`` too.
 
@@ -567,6 +567,35 @@ def remote_index(
 # -- push ------------------------------------------------------------------------------------
 
 
+def read_through(root: Path) -> None:
+    """Each recording here read once before it may go up (``xpisode_format.sync.check``:
+    structure, checksums, every AV1 frame decoded in order); one that does not read whole
+    stays here, and says why. A framework from before the check has no such rule: nothing
+    to do."""
+    from xpisode_format import sync
+
+    check, checked = getattr(sync, "check", None), getattr(sync, "checked", None)
+    if check is None or checked is None:
+        return
+    ledger = Ledger(root)
+    gone = deleted(root)
+    for path in sorted((root / "store" / "episodes").glob("*/*/*.mcap")):
+        episode_id = path.stem
+        if episode_id in gone or path.is_symlink() or checked(root, episode_id) is not None:
+            continue
+        pushed = ledger.state(episode_keys(episode_id)[0]) == "pushed"
+        if pushed or sealed(root, episode_id) is None:
+            continue
+        try:
+            ok, problems = check(root, episode_id)
+        except Exception as error:  # noqa: BLE001 - one bad file must not stop the rest
+            print(f"{episode_id}: could not be read through: {error}")
+            continue
+        if not ok:
+            why = problems[0] if problems else "?"
+            print(f"{episode_id}: does not read whole, stays here: {why}")
+
+
 def make_sidecars(root: Path) -> None:
     """Each recording's sidecar and thumbnail, made where missing, so they go up after it
     (store.md 4)."""
@@ -1026,6 +1055,7 @@ def push(
     started = time.time_ns()
     now = now_unix_ns if now_unix_ns is not None else started
     make_sidecars(root)
+    read_through(root)
     ledger = Ledger(root)
     left = backlog(root, now_unix_ns=now, free_after_s=free_after_s)
     ready = left.ready
