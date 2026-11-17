@@ -10,8 +10,8 @@ supported-markers = [
 
 [manifest]
 overrides = [
-    { name = "xpisode-device", extras = ["iox"], git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-device&rev=5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b" },
-    { name = "xpisode-format", extras = ["rerun"], git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-format&rev=5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b" },
+    { name = "xpisode-device", extras = ["iox"], git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-device&rev=0a6cd5926253e7c43a9204cbc73b32eed8d7e22e" },
+    { name = "xpisode-format", extras = ["rerun"], git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-format&rev=0a6cd5926253e7c43a9204cbc73b32eed8d7e22e" },
 ]
 
 [[package]]
@@ -681,7 +681,7 @@ wheels = [
 [[package]]
 name = "xpisode"
 version = "0.1.0"
-source = { git = "ssh://git@github.com/ningma-dev/xpisode.git?rev=5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b#5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b" }
+source = { git = "ssh://git@github.com/ningma-dev/xpisode.git?rev=0a6cd5926253e7c43a9204cbc73b32eed8d7e22e#0a6cd5926253e7c43a9204cbc73b32eed8d7e22e" }
 dependencies = [
     { name = "fastapi", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "pydantic", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
@@ -694,7 +694,7 @@ dependencies = [
 [[package]]
 name = "xpisode-abc-gello"
 version = "0.2.0"
-source = { git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git?rev=c3e6246c21e246fb65c158eeec3b407712f2eb7d#c3e6246c21e246fb65c158eeec3b407712f2eb7d" }
+source = { git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git?rev=5c99469c2cdfebef6ddd661da6e31aface22994d#5c99469c2cdfebef6ddd661da6e31aface22994d" }
 dependencies = [
     { name = "dynamixel-sdk", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "numpy", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
@@ -706,7 +706,7 @@ dependencies = [
 [[package]]
 name = "xpisode-device"
 version = "0.1.0"
-source = { git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-device&rev=5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b#5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b" }
+source = { git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-device&rev=0a6cd5926253e7c43a9204cbc73b32eed8d7e22e#0a6cd5926253e7c43a9204cbc73b32eed8d7e22e" }
 dependencies = [
     { name = "numpy", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "pydantic", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
@@ -721,7 +721,7 @@ iox = [
 [[package]]
 name = "xpisode-env"
 version = "0.1.0"
-source = { git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-env&rev=5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b#5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b" }
+source = { git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-env&rev=0a6cd5926253e7c43a9204cbc73b32eed8d7e22e#0a6cd5926253e7c43a9204cbc73b32eed8d7e22e" }
 dependencies = [
     { name = "numpy", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "pydantic", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
@@ -732,7 +732,7 @@ dependencies = [
 [[package]]
 name = "xpisode-format"
 version = "0.1.0"
-source = { git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-format&rev=5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b#5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b" }
+source = { git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-format&rev=0a6cd5926253e7c43a9204cbc73b32eed8d7e22e#0a6cd5926253e7c43a9204cbc73b32eed8d7e22e" }
 dependencies = [
     { name = "av", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "mcap", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
@@ -794,11 +794,11 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "xpisode", git = "ssh://git@github.com/ningma-dev/xpisode.git?rev=5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b" },
-    { name = "xpisode-abc-gello", git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git?rev=c3e6246c21e246fb65c158eeec3b407712f2eb7d" },
-    { name = "xpisode-device", git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-device&rev=5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b" },
-    { name = "xpisode-env", git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-env&rev=5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b" },
-    { name = "xpisode-format", git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-format&rev=5aba4f315edf62e4aa3f56e96b7db47ea4fdbd2b" },
+    { name = "xpisode", git = "ssh://git@github.com/ningma-dev/xpisode.git?rev=0a6cd5926253e7c43a9204cbc73b32eed8d7e22e" },
+    { name = "xpisode-abc-gello", git = "ssh://git@github.com/ningma-dev/xpisode-abc-gello.git?rev=5c99469c2cdfebef6ddd661da6e31aface22994d" },
+    { name = "xpisode-device", git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-device&rev=0a6cd5926253e7c43a9204cbc73b32eed8d7e22e" },
+    { name = "xpisode-env", git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-env&rev=0a6cd5926253e7c43a9204cbc73b32eed8d7e22e" },
+    { name = "xpisode-format", git = "ssh://git@github.com/ningma-dev/xpisode.git?subdirectory=packages%2Fxpisode-format&rev=0a6cd5926253e7c43a9204cbc73b32eed8d7e22e" },
     { name = "xpisode-i2rt", git = "ssh://git@github.com/ningma-dev/xpisode-i2rt.git?rev=c458074178b99bb0dac2cdbb18d1f2926338c28c" },
     { name = "xpisode-realsense", git = "ssh://git@github.com/ningma-dev/xpisode-realsense.git?rev=554634811943a7e46501c262b11215c5a0c87005" },
 ]
