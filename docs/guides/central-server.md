@@ -81,6 +81,21 @@ setsid nohup services/feishu/deploy/run.sh >> ~/.local/state/xirra/bot.log 2>&1 
 
 有 systemd 的服务器，用 `services/feishu/deploy/xirra.service` 代替最后一行。成功的样子：`check` 每一项都不是 MISSING；日志里有 `connected to wss://...feishu.cn`；在飞书里给机器人发"进度"有回复。
 
+## 把 OSS 上的录制转成统一的存法
+
+站点从 2026-11-17 起录制时就把图像存成 AV1（设计第 7.4 节）。之前的录制，在中心服务器上转换：从挂载点读出，转换、完整校验，再覆盖 OSS 上的原文件，每 20 条写一条转换记录、发一个索引段。原件不保留。站点收到转换记录后，自己会删掉本机已上传过的旧副本。
+
+服务器上没有 GitHub，也没有能编 AV1 的显卡：把 `xpisode-format` 和 `scripts/oss.py` 拷过去，单独建一个环境，用 SVT-AV1 在 CPU 上编。
+
+```bash
+cd /root/xpisode-convert
+venv/bin/python oss.py --root root convert --admin-config /root/.ossutilconfig --who <名字> --workers 32
+```
+
+- `--root` 是服务器本地放临时文件、记录和索引缓存的地方，不能是挂载点。
+- 已经转过的会跳过，所以中断了再跑一遍就行；先用 `--limit 3` 试几条。
+- 要用管理员的 ossutil 配置：覆盖原文件需要它。
+
 ## 机器人知道的团队情况从哪来
 
 没有要手写的说明文件。机器人每十分钟重新读一遍：
