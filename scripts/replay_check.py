@@ -65,7 +65,17 @@ from xpisode_format.tasks import TaskReader
 FACTORY = "xpisode_device.playback:Playback"
 REPLAY = "replay"
 """``<root>/local/replay/<run id>/``: each check's station project."""
-DROPPED = ("station", "episodes", "models", "data_root", "devices", "clients", "groups", "inputs")
+DROPPED = (
+    "station",
+    "episodes",
+    "models",
+    "data_root",
+    "devices",
+    "clients",
+    "groups",
+    "inputs",
+    "images",  # a replay stores what it plays as it is: no encoders, no GPU
+)
 """Keys of ``run.json`` the replay station file does not take from it: it names its own."""
 POLL_S = 0.2
 

@@ -28,6 +28,12 @@ required_streams = [
 ]
 
 
+# Cameras send raw images; the station stores them as AV1 (one encoder process per camera).
+[images]
+encoder = "nvenc"
+quality = 28
+keyframe_interval = 10
+
 [[devices]]
 name = "follower_l"
 exclusive = ["can:can_follower_l"]
@@ -58,7 +64,7 @@ exclusive = ["realsense:262422270541"]
 command = [
   "../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
   "--factory", "xpisode_realsense:D405", "--config",
-  '{"serial": "262422270541", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000, "image_encoding": "av1"}',
+  '{"serial": "262422270541", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000, "image_encoding": "raw"}',
 ]
 
 [[devices]]
@@ -67,7 +73,7 @@ exclusive = ["realsense:262622270461"]
 command = [
   "../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
   "--factory", "xpisode_realsense:D405", "--config",
-  '{"serial": "262622270461", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000, "image_encoding": "av1"}',
+  '{"serial": "262622270461", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000, "image_encoding": "raw"}',
 ]
 
 [[devices]]
@@ -76,7 +82,7 @@ exclusive = ["realsense:262422270285"]
 command = [
   "../../.venv/bin/python", "-m", "xpisode_device.cli", "run", "--station", "{station}", "--name", "{name}",
   "--factory", "xpisode_realsense:D405", "--config",
-  '{"serial": "262422270285", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000, "image_encoding": "av1"}',
+  '{"serial": "262422270285", "frame_fields": ["color", "infrared_left", "infrared_right"], "width": 640, "height": 480, "fps": 30, "exposure_us": 32000, "image_encoding": "raw"}',
 ]
 
 [groups.left]
